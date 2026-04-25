@@ -251,7 +251,15 @@ canvas { display: block; }
         </div>
         <div class="readout">
           <div class="row"><span class="lbl">Semantic embedding:</span><span class="val" style="color:#3b82f6;">"dog" (fixed)</span></div>
-          <div class="row"><span class="lbl">Position vector |PE|:</span><span class="val" id="s2pemag">0.000</span></div>
+          <div class="row">
+            <span class="lbl" style="color:#ef4444;">PE<sub>x</sub> = sin(pos / 10000<sup>0.45</sup>):</span>
+            <span class="val" id="s2pex" style="color:#ef4444;">0.000</span>
+          </div>
+          <div class="row">
+            <span class="lbl" style="color:#7c3aed;">PE<sub>y</sub> = cos(pos / 10000<sup>0.56</sup>):</span>
+            <span class="val" id="s2pey" style="color:#7c3aed;">1.000</span>
+          </div>
+          <div class="row"><span class="lbl">Combined |PE|:</span><span class="val" id="s2pemag">0.000</span></div>
           <div class="row"><span class="lbl">Displacement from pos=0:</span><span class="val" id="s2disp">0.000</span></div>
           <div class="distortion dist-none" id="s2distLabel">Semantic Distortion: None</div>
         </div>
@@ -259,6 +267,28 @@ canvas { display: block; }
           <strong>Notice</strong>
           <p>The same word "dog" ends up at a <em>completely different point</em> in embedding space depending on its position. Two identical words at different positions look semantically different to the model — addition corrupts content with location.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Wave charts showing PE components -->
+    <div style="margin-top:20px; background:white; border-radius:12px; padding:20px 24px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+      <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:3px;">The two sinusoidal frequencies driving the red dot:</div>
+      <div style="font-size:12px; color:#64748b; margin-bottom:16px;">The slider picks instantaneous values off these waves — one sets x-offset, the other sets y-offset.</div>
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px; font-weight:700; color:#ef4444; margin-bottom:5px;">
+          Dimension 1 (Sine wave) → <em>x</em>-displacement &nbsp;
+          <span style="font-weight:400; font-family:monospace; background:#fff1f2; padding:2px 6px; border-radius:4px;">PE<sub>x</sub> = sin(pos / 10000<sup>0.45</sup>)</span>
+        </div>
+        <canvas id="s2wave1" width="760" height="90" style="width:100%; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.07); display:block;"></canvas>
+      </div>
+
+      <div>
+        <div style="font-size:12px; font-weight:700; color:#7c3aed; margin-bottom:5px;">
+          Dimension 2 (Cosine wave) → <em>y</em>-displacement &nbsp;
+          <span style="font-weight:400; font-family:monospace; background:#faf5ff; padding:2px 6px; border-radius:4px;">PE<sub>y</sub> = cos(pos / 10000<sup>0.56</sup>)</span>
+        </div>
+        <canvas id="s2wave2" width="760" height="90" style="width:100%; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.07); display:block;"></canvas>
       </div>
     </div>
   </div>
@@ -502,10 +532,18 @@ function initStep2() {
   const cx = W / 2, cy = H / 2;
   const scale = 62;
 
-  // Fixed semantic position of "dog"
-  const semX = 0.9, semY = 0.75;
+  const wc1 = document.getElementById('s2wave1');
+  const wctx1 = wc1.getContext('2d');
+  const wc2 = document.getElementById('s2wave2');
+  const wctx2 = wc2.getContext('2d');
 
-  // Neighbor words in semantic space
+  const semX = 0.9, semY = 0.75;
+  const WMAX = 1000;
+  // 10000^0.45 ≈ 56, 10000^0.56 ≈ 183 — two different PE dimension frequencies
+  const FREQ1 = Math.pow(10000, 0.45);
+  const FREQ2 = Math.pow(10000, 0.56);
+  const AMP = 1.4;
+
   const neighbors = [
     { label: '"cat"',  x: 1.55, y: 0.45 },
     { label: '"wolf"', x: 0.45, y: 1.15 },
@@ -513,32 +551,86 @@ function initStep2() {
     { label: '"fox"',  x: 0.55, y: 0.35 },
   ];
 
-  // PE as two sin components that both start at 0
   function getPE(pos) {
-    const px = Math.sin(pos / 55)  * 1.4;
-    const py = Math.sin(pos / 180) * 1.4;
-    return { px, py };
+    return {
+      px: Math.sin(pos / FREQ1) * AMP,
+      py: Math.cos(pos / FREQ2) * AMP
+    };
   }
 
   function toCanvas(mx, my) {
     return { x: cx + mx * scale, y: cy - my * scale };
   }
 
-  function drawArrow(ctx, x1, y1, x2, y2, color, width) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.stroke();
-    const ang = Math.atan2(y2 - y1, x2 - x1);
-    const hl = 10;
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - hl * Math.cos(ang - Math.PI/6), y2 - hl * Math.sin(ang - Math.PI/6));
-    ctx.lineTo(x2 - hl * Math.cos(ang + Math.PI/6), y2 - hl * Math.sin(ang + Math.PI/6));
-    ctx.fillStyle = color;
-    ctx.fill();
+  function drawArrow(c, x1, y1, x2, y2, color, lw) {
+    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
+    c.strokeStyle = color; c.lineWidth = lw; c.stroke();
+    const ang = Math.atan2(y2 - y1, x2 - x1), hl = 10;
+    c.beginPath();
+    c.moveTo(x2, y2);
+    c.lineTo(x2 - hl*Math.cos(ang - Math.PI/6), y2 - hl*Math.sin(ang - Math.PI/6));
+    c.lineTo(x2 - hl*Math.cos(ang + Math.PI/6), y2 - hl*Math.sin(ang + Math.PI/6));
+    c.fillStyle = color; c.fill();
+  }
+
+  function drawWaveChart(wctx, WW, WH, freq, usecos, color, pos) {
+    wctx.clearRect(0, 0, WW, WH);
+    wctx.fillStyle = '#f8fafc';
+    wctx.fillRect(0, 0, WW, WH);
+
+    const yUnit = (WH / 2 - 12) / AMP;
+
+    // Dashed ±AMP lines
+    wctx.setLineDash([3, 3]);
+    wctx.strokeStyle = '#d1d5db'; wctx.lineWidth = 1;
+    wctx.beginPath(); wctx.moveTo(0, WH/2 - yUnit); wctx.lineTo(WW, WH/2 - yUnit); wctx.stroke();
+    wctx.beginPath(); wctx.moveTo(0, WH/2 + yUnit); wctx.lineTo(WW, WH/2 + yUnit); wctx.stroke();
+    wctx.setLineDash([]);
+
+    // Zero line
+    wctx.strokeStyle = '#cbd5e1'; wctx.lineWidth = 1;
+    wctx.beginPath(); wctx.moveTo(0, WH/2); wctx.lineTo(WW, WH/2); wctx.stroke();
+
+    // ±AMP labels
+    wctx.fillStyle = '#94a3b8'; wctx.font = '9px sans-serif'; wctx.textAlign = 'left';
+    wctx.fillText('+' + AMP.toFixed(1), 2, WH/2 - yUnit + 3);
+    wctx.fillText('-' + AMP.toFixed(1), 2, WH/2 + yUnit + 9);
+
+    // Wave path
+    wctx.beginPath();
+    wctx.strokeStyle = color + '99'; wctx.lineWidth = 2;
+    for (let p = 0; p <= WMAX; p++) {
+      const v = usecos ? Math.cos(p / freq) * AMP : Math.sin(p / freq) * AMP;
+      const wx = (p / WMAX) * WW;
+      const wy = WH/2 - v * yUnit;
+      p === 0 ? wctx.moveTo(wx, wy) : wctx.lineTo(wx, wy);
+    }
+    wctx.stroke();
+
+    // Scrubber line
+    const sx = (pos / WMAX) * WW;
+    wctx.strokeStyle = 'rgba(239,68,68,0.5)'; wctx.lineWidth = 1.5;
+    wctx.setLineDash([4, 3]);
+    wctx.beginPath(); wctx.moveTo(sx, 0); wctx.lineTo(sx, WH); wctx.stroke();
+    wctx.setLineDash([]);
+
+    // Current value dot + label
+    const curVal = usecos ? Math.cos(pos / freq) * AMP : Math.sin(pos / freq) * AMP;
+    const dotY = WH/2 - curVal * yUnit;
+    wctx.beginPath(); wctx.arc(sx, dotY, 5.5, 0, 2*Math.PI);
+    wctx.fillStyle = color; wctx.fill();
+    wctx.strokeStyle = 'white'; wctx.lineWidth = 1.5; wctx.stroke();
+
+    wctx.fillStyle = color; wctx.font = 'bold 11px sans-serif';
+    const rightEdge = sx > WW * 0.88;
+    wctx.textAlign = rightEdge ? 'right' : 'left';
+    const lx = rightEdge ? sx - 8 : sx + 8;
+    wctx.fillText(curVal.toFixed(3), lx, Math.max(13, Math.min(WH - 4, dotY - 6)));
+
+    // Position axis label
+    wctx.fillStyle = '#94a3b8'; wctx.font = '10px sans-serif'; wctx.textAlign = 'center';
+    wctx.fillText('Position →', WW / 2, WH - 2);
+    wctx.textAlign = 'left';
   }
 
   function draw2() {
@@ -547,54 +639,66 @@ function initStep2() {
     const { px, py } = getPE(pos);
     const rx = semX + px, ry = semY + py;
 
-    ctx.clearRect(0, 0, W, H);
+    // Wave charts
+    drawWaveChart(wctx1, wc1.width, wc1.height, FREQ1, false, '#ef4444', pos);
+    drawWaveChart(wctx2, wc2.width, wc2.height, FREQ2, true,  '#7c3aed', pos);
 
-    // Grid
+    // 2D canvas
+    ctx.clearRect(0, 0, W, H);
     ctx.strokeStyle = '#e8edf3'; ctx.lineWidth = 1;
     for (let g = -4; g <= 4; g++) {
       ctx.beginPath(); ctx.moveTo(cx + g*scale, 0); ctx.lineTo(cx + g*scale, H); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, cy - g*scale); ctx.lineTo(W, cy - g*scale); ctx.stroke();
     }
-
-    // Axes
     ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
 
-    // Axis labels
     ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('Semantic Dim 1', cx, H - 6);
     ctx.save(); ctx.translate(12, cy); ctx.rotate(-Math.PI/2);
     ctx.fillText('Semantic Dim 2', 0, 0); ctx.restore();
     ctx.textAlign = 'left';
 
-    // Semantic neighborhood circle
     const sem = toCanvas(semX, semY);
-    ctx.beginPath();
-    ctx.arc(sem.x, sem.y, scale * 0.85, 0, 2*Math.PI);
+    ctx.beginPath(); ctx.arc(sem.x, sem.y, scale * 0.85, 0, 2*Math.PI);
     ctx.strokeStyle = 'rgba(59,130,246,0.18)'; ctx.lineWidth = 2;
     ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(59,130,246,0.04)'; ctx.fill();
     ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
     ctx.fillText('animal words cluster', sem.x - 44, sem.y - scale * 0.9);
 
-    // Neighbor dots
     neighbors.forEach(n => {
       const nc = toCanvas(n.x, n.y);
-      ctx.beginPath();
-      ctx.arc(nc.x, nc.y, 5, 0, 2*Math.PI);
+      ctx.beginPath(); ctx.arc(nc.x, nc.y, 5, 0, 2*Math.PI);
       ctx.fillStyle = 'rgba(59,130,246,0.35)'; ctx.fill();
       ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
       ctx.fillText(n.label, nc.x + 7, nc.y + 4);
     });
 
-    // Position vector arrow (from semantic dot to result)
     if (pos > 0) {
       const res = toCanvas(rx, ry);
+      const midX = toCanvas(rx, semY);
+
+      // Dashed component arrows
+      ctx.setLineDash([4, 3]); ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#ef4444';
+      ctx.beginPath(); ctx.moveTo(sem.x, sem.y); ctx.lineTo(midX.x, sem.y); ctx.stroke();
+      ctx.strokeStyle = '#7c3aed';
+      ctx.beginPath(); ctx.moveTo(midX.x, sem.y); ctx.lineTo(res.x, res.y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Component labels
+      ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('PE_x=' + px.toFixed(2), (sem.x + midX.x)/2, sem.y - 6);
+      ctx.fillStyle = '#7c3aed';
+      const pxLabelX = midX.x + (res.x > midX.x ? 22 : -22);
+      ctx.fillText('PE_y=' + py.toFixed(2), pxLabelX, (sem.y + res.y)/2 + 4);
+      ctx.textAlign = 'left';
+
+      // Main resultant arrow
       drawArrow(ctx, sem.x, sem.y, res.x, res.y, '#ef4444', 2.5);
-      ctx.fillStyle = '#ef4444'; ctx.font = 'bold 11px sans-serif';
-      const mx = (sem.x + res.x) / 2 + 6, my = (sem.y + res.y) / 2 - 7;
-      ctx.fillText('+ PE(pos)', mx, my);
 
       // Result dot (purple)
       ctx.beginPath(); ctx.arc(res.x, res.y, 9, 0, 2*Math.PI);
@@ -606,7 +710,7 @@ function initStep2() {
       ctx.fillText('pos=' + pos, res.x + 12, res.y + 10);
     }
 
-    // Original blue dot
+    // Original blue dot (always on top)
     ctx.beginPath(); ctx.arc(sem.x, sem.y, 9, 0, 2*Math.PI);
     ctx.fillStyle = '#3b82f6'; ctx.fill();
     ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
@@ -615,9 +719,11 @@ function initStep2() {
     ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
     ctx.fillText('pos=0', sem.x + 12, sem.y + 10);
 
-    // Update readout
+    // Stats panel update
     const mag = Math.sqrt(px*px + py*py);
     const disp = Math.sqrt((rx - semX)**2 + (ry - semY)**2);
+    document.getElementById('s2pex').textContent = px.toFixed(3);
+    document.getElementById('s2pey').textContent = py.toFixed(3);
     document.getElementById('s2pemag').textContent = mag.toFixed(3);
     document.getElementById('s2disp').textContent = disp.toFixed(3);
     const dl = document.getElementById('s2distLabel');

@@ -178,6 +178,57 @@ input[type="range"] { width: 100%; accent-color: #3b82f6; cursor: pointer; }
 .btn-green { background: #10b981; color: white; }
 .btn-green:hover { background: #059669; }
 canvas { display: block; }
+
+/* ── STEP 5 ── */
+.s5-embed-section { margin-top: 20px; margin-bottom: 24px; }
+.s5-embed-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.s5-embed-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.s5-pair {
+  display: flex; flex-direction: column; gap: 5px; cursor: pointer;
+  border: 2px solid #e2e8f0; border-radius: 10px; padding: 8px 10px;
+  background: #f8fafc; transition: all 0.2s; min-width: 118px;
+}
+.s5-pair:hover { border-color: #93c5fd; background: #eff6ff; }
+.s5-pair.selected { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+.s5-pair-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+.s5-pair.selected .s5-pair-label { color: #d97706; }
+.s5-cell-row { display: flex; gap: 5px; }
+.s5-cell {
+  display: flex; flex-direction: column; align-items: center;
+  background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; min-width: 50px;
+}
+.s5-pair.selected .s5-cell { border-color: #fcd34d; background: #fffde7; }
+.s5-dim-idx { font-size: 9px; color: #94a3b8; font-family: monospace; margin-bottom: 2px; }
+.s5-cell-val { font-family: monospace; font-size: 14px; font-weight: 700; color: #334155; }
+.s5-pair.selected .s5-cell-val { color: #92400e; }
+.s5-main-layout { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.s5-equation-area { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.s5-formula-chip {
+  background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px;
+  padding: 8px 14px; font-family: monospace; font-size: 13px; color: #334155; text-align: center;
+}
+.s5-formula-chip .chip-blue { color: #2563eb; font-weight: 700; }
+.s5-eq-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.s5-mat { display: inline-flex; align-items: stretch; }
+.s5-mat-bl { width: 10px; border-top: 2.5px solid #334155; border-left: 2.5px solid #334155; border-bottom: 2.5px solid #334155; border-radius: 3px 0 0 3px; }
+.s5-mat-br { width: 10px; border-top: 2.5px solid #334155; border-right: 2.5px solid #334155; border-bottom: 2.5px solid #334155; border-radius: 0 3px 3px 0; }
+.s5-out-mat-bl { width: 10px; border-top: 2.5px solid #f59e0b; border-left: 2.5px solid #f59e0b; border-bottom: 2.5px solid #f59e0b; border-radius: 3px 0 0 3px; }
+.s5-out-mat-br { width: 10px; border-top: 2.5px solid #f59e0b; border-right: 2.5px solid #f59e0b; border-bottom: 2.5px solid #f59e0b; border-radius: 0 3px 3px 0; }
+.s5-mat-inner { display: flex; flex-direction: column; gap: 10px; padding: 10px 14px; }
+.s5-mat-row { display: flex; gap: 16px; }
+.s5-mat-cell { font-family: monospace; font-size: 14px; font-weight: 600; min-width: 76px; text-align: right; color: #1e3a8a; }
+.s5-vec-cell { font-family: monospace; font-size: 14px; font-weight: 700; min-width: 60px; text-align: right; color: #334155; }
+.s5-out-cell { font-family: monospace; font-size: 14px; font-weight: 700; min-width: 60px; text-align: right; color: #d97706; }
+.s5-op { font-size: 22px; font-weight: 300; color: #64748b; align-self: center; }
+.s5-angle-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.s5-achip { border-radius: 6px; padding: 5px 12px; font-family: monospace; font-size: 12px; font-weight: 600; }
+.s5-achip-blue { background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; }
+.s5-achip-amber { background: #fef9c3; border: 1px solid #fbbf24; color: #92400e; }
+.s5-canvas-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.s5-connect-label { font-size: 12px; font-weight: 700; color: #d97706; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.s5-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.s5-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #374151; font-weight: 600; }
+.s5-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -190,6 +241,7 @@ canvas { display: block; }
     <button class="step-btn" id="nav-2" onclick="goToStep(2)">② The Addition Flaw</button>
     <button class="step-btn" id="nav-3" onclick="goToStep(3)">③ The Rotation Fix</button>
     <button class="step-btn" id="nav-4" onclick="goToStep(4)">④ Relative Distance Payoff</button>
+    <button class="step-btn" id="nav-5" onclick="goToStep(5)">⑤ Matrix Application</button>
   </div>
 </div>
 
@@ -198,7 +250,7 @@ canvas { display: block; }
 <!-- ═══════════════════ STEP 1 ═══════════════════ -->
 <div class="step-panel active" id="step-1">
   <div class="card">
-    <div class="step-label">Step 1 of 4</div>
+    <div class="step-label">Step 1 of 5</div>
     <div class="step-title">The Permutation Problem</div>
     <div class="step-desc">
       Raw self-attention has <strong>no concept of word order</strong> — it treats a sentence as an unordered set of tokens.
@@ -235,7 +287,7 @@ canvas { display: block; }
 <!-- ═══════════════════ STEP 2 ═══════════════════ -->
 <div class="step-panel" id="step-2">
   <div class="card">
-    <div class="step-label">Step 2 of 4</div>
+    <div class="step-label">Step 2 of 5</div>
     <div class="step-title">The "Absolute Addition" Flaw</div>
     <div class="step-desc">
       The original Transformer adds a sinusoidal position vector directly to the word embedding.
@@ -301,7 +353,7 @@ canvas { display: block; }
 <!-- ═══════════════════ STEP 3 ═══════════════════ -->
 <div class="step-panel" id="step-3">
   <div class="card">
-    <div class="step-label">Step 3 of 4</div>
+    <div class="step-label">Step 3 of 5</div>
     <div class="step-title">The Rotary Mechanism</div>
     <div class="step-desc">
       Instead of adding a position vector, RoPE <strong>rotates</strong> the embedding vector by an angle proportional to its position.
@@ -340,7 +392,7 @@ canvas { display: block; }
 <!-- ═══════════════════ STEP 4 ═══════════════════ -->
 <div class="step-panel" id="step-4">
   <div class="card">
-    <div class="step-label">Step 4 of 4</div>
+    <div class="step-label">Step 4 of 5</div>
     <div class="step-title">The Relative Distance Payoff</div>
     <div class="step-desc">
       Absolute rotations yield <strong>relative distances</strong> automatically when you compute the attention dot product.
@@ -374,11 +426,147 @@ canvas { display: block; }
 
     <div class="aha-box" style="margin-top:20px;">
       <strong>The Grand Insight</strong>
-      <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes — because <strong>cos((n−m)θ)</strong> depends only on the gap between tokens, not their absolute positions. This is RoPE's core mathematical guarantee: attention scores encode relative, not absolute, positions.</p>
+      <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes because cos((n−m)θ) depends only on the gap between tokens, not their absolute positions. This is RoPE's core mathematical guarantee: attention scores encode relative, not absolute, positions.</p>
     </div>
   </div>
   <div class="nav-buttons">
     <button class="nav-btn prev" onclick="goToStep(3)">← Back</button>
+    <button class="nav-btn next" onclick="goToStep(5)">Next: Matrix Application →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ STEP 5 ═══════════════════ -->
+<div class="step-panel" id="step-5">
+  <div class="card">
+    <div class="step-label">Step 5 of 5</div>
+    <div class="step-title">Under the Hood: Matrix Application</div>
+    <div class="step-desc">
+      RoPE applies a unique <strong>2×2 rotation matrix</strong> to each pair of embedding dimensions.
+      Click a token from <em>"The dog bit the man"</em> to load its embedding, then click a pair to drill into the rotation equation.
+    </div>
+
+    <!-- Token strip -->
+    <div style="margin-top: 20px; margin-bottom: 6px;">
+      <div class="s5-embed-label" style="margin-bottom: 8px;">Select a token — its 8-dim embedding is split into 4 pairs and rotated by position:</div>
+      <div class="token-strip" id="s5tokenStrip" style="margin-bottom: 0;"></div>
+      <div style="margin-top: 10px; font-size: 13px; color: #64748b;">
+        Encoding: <strong id="s5tokenWord" style="color: #0f172a;">"dog"</strong>
+        at position <strong id="s5tokenPos" style="color: #3b82f6;">m = 1</strong>
+        — its 8-dim embedding is split into 4 pairs, each rotated by a different angle
+      </div>
+    </div>
+
+    <!-- Embedding vector row -->
+    <div class="s5-embed-section">
+      <div class="s5-embed-label">Embedding vector (d = 8) — click a pair for the rotation equation below →</div>
+      <div class="s5-embed-row" id="s5embedRow"></div>
+    </div>
+
+    <!-- Before → After table -->
+    <div style="margin-top: 16px; margin-bottom: 24px;">
+      <div class="s5-embed-label" style="margin-bottom: 10px;">All 4 pairs — before &amp; after RoPE at position m (highlighted row = selected pair)</div>
+      <div style="overflow-x: auto;">
+        <table id="s5baTable" style="border-collapse: collapse; font-size: 13px; width: 100%;"></table>
+      </div>
+    </div>
+
+    <!-- Equation + Cartesian plane -->
+    <div class="s5-main-layout">
+
+      <!-- Equation area -->
+      <div class="s5-equation-area">
+        <div class="s5-formula-chip">
+          &theta;&nbsp;=&nbsp;m&nbsp;&times;&nbsp;10000<sup style="font-size:10px;">&minus;2i/d</sup>
+          &nbsp;&nbsp;(i&nbsp;=&nbsp;<span class="chip-blue" id="s5iDisplay">0</span>,&nbsp;d&nbsp;=&nbsp;8)
+        </div>
+
+        <div class="s5-eq-row">
+          <!-- 2×2 Rotation Matrix -->
+          <div class="s5-mat">
+            <div class="s5-mat-bl"></div>
+            <div class="s5-mat-inner">
+              <div class="s5-mat-row">
+                <span class="s5-mat-cell" id="s5m00">&nbsp;1.0000</span>
+                <span class="s5-mat-cell" id="s5m01">&nbsp;0.0000</span>
+              </div>
+              <div class="s5-mat-row">
+                <span class="s5-mat-cell" id="s5m10">&nbsp;0.0000</span>
+                <span class="s5-mat-cell" id="s5m11">&nbsp;1.0000</span>
+              </div>
+            </div>
+            <div class="s5-mat-br"></div>
+          </div>
+
+          <span class="s5-op">&times;</span>
+
+          <!-- Input column vector -->
+          <div class="s5-mat">
+            <div class="s5-mat-bl"></div>
+            <div class="s5-mat-inner">
+              <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v0">&nbsp;0.5000</span></div>
+              <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v1">-0.2000</span></div>
+            </div>
+            <div class="s5-mat-br"></div>
+          </div>
+
+          <span class="s5-op">=</span>
+
+          <!-- Output column vector (amber = links to canvas) -->
+          <div class="s5-mat">
+            <div class="s5-out-mat-bl"></div>
+            <div class="s5-mat-inner">
+              <div class="s5-mat-row"><span class="s5-out-cell" id="s5out0">&nbsp;0.5000</span></div>
+              <div class="s5-mat-row"><span class="s5-out-cell" id="s5out1">-0.2000</span></div>
+            </div>
+            <div class="s5-out-mat-br"></div>
+          </div>
+        </div>
+
+        <div class="s5-angle-chips">
+          <div class="s5-achip s5-achip-blue">&theta; = <span id="s5theta_rad">0.0000 rad</span></div>
+          <div class="s5-achip s5-achip-amber">= <span id="s5theta">0.00&deg;</span></div>
+        </div>
+      </div>
+
+      <!-- Canvas + legend -->
+      <div class="s5-canvas-wrap">
+        <div class="s5-connect-label">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Output vector on 2D plane
+        </div>
+        <canvas id="s5canvas" width="290" height="290"
+          style="border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);"></canvas>
+        <div class="s5-legend">
+          <div class="s5-legend-item">
+            <div class="s5-legend-dot" style="background:#94a3b8;"></div>Input (x, y)
+          </div>
+          <div class="s5-legend-item">
+            <div class="s5-legend-dot" style="background:#f59e0b;"></div>Output (x&prime;, y&prime;)
+          </div>
+          <div class="s5-legend-item">
+            <div class="s5-legend-dot" style="background:#10b981;"></div>Rotation arc
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Position slider -->
+    <div class="ctrl-group" style="margin-top:24px;">
+      <label class="ctrl-lbl" for="s5slider">
+        Token Position (m): <strong id="s5mval">1</strong>
+      </label>
+      <input type="range" id="s5slider" min="0" max="20" value="1" step="1">
+    </div>
+
+    <div class="aha-box" style="margin-top:16px;">
+      <strong>Notice</strong>
+      <p>Each pair uses a <em>different frequency</em>: Pair 0 (i=0) rotates fastest — by <em>m</em> radians per step — while Pair 3 (i=3) barely moves. This multi-scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn prev" onclick="goToStep(4)">← Back</button>
   </div>
 </div>
 
@@ -389,7 +577,7 @@ canvas { display: block; }
 //  NAVIGATION
 // ─────────────────────────────────────────────
 let currentStep = 1;
-const stepInits = { 2: false, 3: false, 4: false };
+const stepInits = { 2: false, 3: false, 4: false, 5: false };
 
 function goToStep(n) {
   document.getElementById('step-' + currentStep).classList.remove('active');
@@ -401,6 +589,7 @@ function goToStep(n) {
   if (n === 2 && !stepInits[2]) { initStep2(); stepInits[2] = true; }
   if (n === 3 && !stepInits[3]) { initStep3(); stepInits[3] = true; }
   if (n === 4 && !stepInits[4]) { initStep4(); stepInits[4] = true; }
+  if (n === 5 && !stepInits[5]) { initStep5(); stepInits[5] = true; }
 }
 
 
@@ -930,6 +1119,245 @@ function initStep4() {
   });
 
   draw4();
+}
+
+
+// ─────────────────────────────────────────────
+//  STEP 5 — MATRIX APPLICATION
+// ─────────────────────────────────────────────
+function initStep5() {
+  const S5_WORDS = ['The', 'dog', 'bit', 'the', 'man'];
+  const S5_EMBEDS = [
+    [ 0.3, -0.1,  0.6,  0.2, -0.4,  0.7,  0.5, -0.2],
+    [ 0.5, -0.2,  0.8,  0.1, -0.6,  0.4,  0.9, -0.3],
+    [-0.1,  0.7,  0.4, -0.5,  0.3,  0.8, -0.2,  0.6],
+    [ 0.2,  0.4, -0.3,  0.6,  0.7, -0.1,  0.4,  0.5],
+    [ 0.6,  0.3,  0.2, -0.7,  0.1,  0.5, -0.8,  0.4],
+  ];
+  const D = 8;
+  let selectedPair = 0;
+  let selectedToken = 1;
+  let EMBED = [...S5_EMBEDS[selectedToken]];
+
+  document.getElementById('s5slider').value = selectedToken;
+
+  const strip = document.getElementById('s5tokenStrip');
+  const tokEls = [];
+  S5_WORDS.forEach((word, pos) => {
+    const tok = document.createElement('span');
+    tok.className = 'tok' + (pos === selectedToken ? ' qa' : '');
+    tok.innerHTML = '<span class="ti">' + pos + '</span>' + word;
+    tok.addEventListener('click', () => {
+      selectedToken = pos;
+      EMBED = [...S5_EMBEDS[pos]];
+      document.getElementById('s5slider').value = pos;
+      document.getElementById('s5tokenWord').textContent = '"' + word + '"';
+      tokEls.forEach((t, i) => { t.className = 'tok' + (i === pos ? ' qa' : ''); });
+      rebuildEmbedRow();
+      update5();
+    });
+    strip.appendChild(tok);
+    tokEls.push(tok);
+  });
+
+  function rebuildEmbedRow() {
+    const embedRow = document.getElementById('s5embedRow');
+    embedRow.innerHTML = '';
+    for (let p = 0; p < 4; p++) {
+      const pairDiv = document.createElement('div');
+      pairDiv.className = 's5-pair' + (p === selectedPair ? ' selected' : '');
+      const lbl = document.createElement('div');
+      lbl.className = 's5-pair-label';
+      lbl.textContent = 'Pair ' + p + '  (i=' + p + ')';
+      pairDiv.appendChild(lbl);
+      const cr = document.createElement('div');
+      cr.className = 's5-cell-row';
+      for (let c = 0; c < 2; c++) {
+        const dim = p * 2 + c;
+        const v = EMBED[dim];
+        const cell = document.createElement('div');
+        cell.className = 's5-cell';
+        cell.innerHTML = '<span class="s5-dim-idx">d' + dim + '</span>' +
+          '<span class="s5-cell-val">' + (v >= 0 ? ' ' : '') + v.toFixed(1) + '</span>';
+        cr.appendChild(cell);
+      }
+      pairDiv.appendChild(cr);
+      pairDiv.addEventListener('click', () => {
+        selectedPair = p;
+        document.querySelectorAll('.s5-pair').forEach(el => el.classList.remove('selected'));
+        pairDiv.classList.add('selected');
+        update5();
+      });
+      embedRow.appendChild(pairDiv);
+    }
+  }
+
+  rebuildEmbedRow();
+
+  function updateBATable(m) {
+    const tbl = document.getElementById('s5baTable');
+    tbl.innerHTML = '';
+    const thead = tbl.createTHead();
+    const hr = thead.insertRow();
+    [
+      { txt: 'Pair (i)',            bg: '#f8fafc', col: '#475569' },
+      { txt: 'Dims',               bg: '#f8fafc', col: '#475569' },
+      { txt: 'x (before)',         bg: '#eff6ff', col: '#1e40af' },
+      { txt: 'y (before)',         bg: '#eff6ff', col: '#1e40af' },
+      { txt: 'θ at position m',     bg: '#f8fafc', col: '#475569' },
+      { txt: "x′ (after)",         bg: '#fffbeb', col: '#92400e' },
+      { txt: "y′ (after)",         bg: '#fffbeb', col: '#92400e' },
+    ].forEach(h => {
+      const th = document.createElement('th');
+      th.textContent = h.txt;
+      th.style.cssText = 'padding:7px 11px;font-weight:700;border:1px solid #e2e8f0;text-align:center;font-size:12px;background:' + h.bg + ';color:' + h.col + ';';
+      hr.appendChild(th);
+    });
+    const tbody = tbl.createTBody();
+    for (let p = 0; p < 4; p++) {
+      const x = EMBED[p * 2], y = EMBED[p * 2 + 1];
+      const theta = m * Math.pow(10000, -2 * p / D);
+      const cosT = Math.cos(theta), sinT = Math.sin(theta);
+      const xOut = x * cosT - y * sinT;
+      const yOut = x * sinT + y * cosT;
+      const isSel = p === selectedPair;
+      const tr = tbody.insertRow();
+      tr.style.background = isSel ? '#fffde7' : (p % 2 ? '#fafbfc' : 'white');
+      if (isSel) tr.style.outline = '2px solid #f59e0b';
+      const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(3);
+      [
+        { txt: 'Pair ' + p + (isSel ? ' ◄' : ''), bold: true, col: isSel ? '#d97706' : '#334155', mono: false },
+        { txt: 'd' + (p*2) + ', d' + (p*2+1), col: '#64748b', mono: true },
+        { txt: fmt(x),    col: '#1e40af', mono: true },
+        { txt: fmt(y),    col: '#1e40af', mono: true },
+        { txt: (theta * 180 / Math.PI).toFixed(2) + '°', col: '#374151', mono: true },
+        { txt: fmt(xOut), col: '#d97706', mono: true, bold: true },
+        { txt: fmt(yOut), col: '#d97706', mono: true, bold: true },
+      ].forEach(c => {
+        const td = tr.insertCell();
+        td.style.cssText = 'padding:7px 11px;border:1px solid #e2e8f0;text-align:center;font-size:12px;' +
+          (c.mono ? 'font-family:monospace;' : '') +
+          (c.bold ? 'font-weight:700;' : '') +
+          (c.col  ? 'color:' + c.col + ';' : '');
+        td.textContent = c.txt;
+      });
+    }
+  }
+
+  const canvas = document.getElementById('s5canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const SCALE = 95;
+
+  function arrow5(x1, y1, x2, y2, color, lw) {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.stroke();
+    const ang = Math.atan2(y2 - y1, x2 - x1), hl = 10;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - hl * Math.cos(ang - Math.PI/6), y2 - hl * Math.sin(ang - Math.PI/6));
+    ctx.lineTo(x2 - hl * Math.cos(ang + Math.PI/6), y2 - hl * Math.sin(ang + Math.PI/6));
+    ctx.fillStyle = color; ctx.fill();
+  }
+
+  function update5() {
+    const m = parseInt(document.getElementById('s5slider').value);
+    document.getElementById('s5mval').textContent = m;
+    document.getElementById('s5tokenPos').textContent = 'm = ' + m;
+    const i = selectedPair;
+    document.getElementById('s5iDisplay').textContent = i;
+
+    const theta = m * Math.pow(10000, -2 * i / D);
+    const cosT = Math.cos(theta), sinT = Math.sin(theta);
+    const x = EMBED[i * 2], y = EMBED[i * 2 + 1];
+    const xOut = x * cosT - y * sinT;
+    const yOut = x * sinT + y * cosT;
+
+    const fmt = v => (v >= 0 ? ' ' : '') + v.toFixed(4);
+    document.getElementById('s5m00').textContent = fmt(cosT);
+    document.getElementById('s5m01').textContent = fmt(-sinT);
+    document.getElementById('s5m10').textContent = fmt(sinT);
+    document.getElementById('s5m11').textContent = fmt(cosT);
+    document.getElementById('s5v0').textContent  = fmt(x);
+    document.getElementById('s5v1').textContent  = fmt(y);
+    document.getElementById('s5out0').textContent = fmt(xOut);
+    document.getElementById('s5out1').textContent = fmt(yOut);
+    document.getElementById('s5theta_rad').textContent = theta.toFixed(4) + ' rad';
+    document.getElementById('s5theta').textContent = (theta * 180 / Math.PI).toFixed(2) + '°';
+
+    updateBATable(m);
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fafbfc';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#e8edf3'; ctx.lineWidth = 1;
+    for (let g = -3; g <= 3; g++) {
+      ctx.beginPath(); ctx.moveTo(cx + g * SCALE, 0); ctx.lineTo(cx + g * SCALE, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, cy - g * SCALE); ctx.lineTo(W, cy - g * SCALE); ctx.stroke();
+    }
+
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+    ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right'; ctx.fillText('x', W - 4, cy - 5);
+    ctx.textAlign = 'center'; ctx.fillText('y', cx + 10, 13);
+    ctx.textAlign = 'left';
+
+    const thetaVis = theta % (2 * Math.PI);
+    if (Math.abs(thetaVis) > 0.005) {
+      const mag = Math.sqrt(x * x + y * y);
+      const arcR = Math.min(mag * SCALE * 0.55, 52);
+      const inputAngle = Math.atan2(y, x);
+      const steps = 48;
+      ctx.beginPath();
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps;
+        const a = inputAngle + thetaVis * t;
+        const px = cx + arcR * Math.cos(a);
+        const py = cy - arcR * Math.sin(a);
+        k === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.5;
+      ctx.setLineDash([4, 3]); ctx.stroke(); ctx.setLineDash([]);
+      const midA = inputAngle + thetaVis / 2;
+      const labelR = arcR + 18;
+      ctx.fillStyle = '#059669'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText((Math.abs(thetaVis) * 180 / Math.PI).toFixed(1) + '°',
+        cx + labelR * Math.cos(midA),
+        cy - labelR * Math.sin(midA) + 4);
+      ctx.textAlign = 'left';
+    }
+
+    const ix = cx + x * SCALE, iy = cy - y * SCALE;
+    arrow5(cx, cy, ix, iy, '#94a3b8', 2.5);
+    ctx.beginPath(); ctx.arc(ix, iy, 4.5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#94a3b8'; ctx.fill();
+
+    ctx.fillStyle = '#64748b'; ctx.font = '10px monospace';
+    ctx.textAlign = ix >= cx ? 'left' : 'right';
+    const iLabelX = ix + (ix >= cx ? 7 : -7);
+    ctx.fillText('(' + x.toFixed(2) + ', ' + y.toFixed(2) + ')', iLabelX, iy - 7);
+
+    const ox = cx + xOut * SCALE, oy = cy - yOut * SCALE;
+    arrow5(cx, cy, ox, oy, '#f59e0b', 3);
+    ctx.beginPath(); ctx.arc(ox, oy, 6.5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#f59e0b'; ctx.fill();
+    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.fillStyle = '#d97706'; ctx.font = 'bold 10px monospace';
+    ctx.textAlign = ox >= cx ? 'left' : 'right';
+    const oLabelX = ox + (ox >= cx ? 9 : -9);
+    const oLabelY = oy + (oy <= cy ? -9 : 14);
+    ctx.fillText('(' + xOut.toFixed(2) + ', ' + yOut.toFixed(2) + ')', oLabelX, oLabelY);
+    ctx.textAlign = 'left';
+  }
+
+  document.getElementById('s5slider').addEventListener('input', update5);
+  update5();
 }
 </script>
 </body>

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding RoPE — Interactive Guide</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f0f4f8;
+  color: #1e293b;
+  min-height: 100vh;
+}
+.header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 20px 14px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.header h1 { font-size: 20px; font-weight: 800; color: #0f172a; }
+.header p { font-size: 12px; color: #64748b; margin-top: 3px; }
+.step-nav {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.step-btn {
+  padding: 7px 14px;
+  border: 2px solid #cbd5e1;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.step-btn:hover { border-color: #93c5fd; color: #3b82f6; }
+.step-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+.main { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 28px;
+  margin-bottom: 16px;
+}
+.step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #3b82f6; margin-bottom: 5px; }
+.step-title { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+.step-desc { color: #64748b; line-height: 1.65; font-size: 14px; }
+.aha-box {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 20px;
+}
+.aha-box strong { color: #92400e; display: block; margin-bottom: 4px; font-size: 13px; }
+.aha-box p { color: #78350f; font-size: 13px; line-height: 1.55; }
+.nav-buttons { display: flex; justify-content: space-between; margin-top: 16px; gap: 12px; }
+.nav-btn {
+  padding: 11px 26px; border-radius: 8px; font-weight: 700;
+  font-size: 14px; cursor: pointer; border: none; transition: all 0.2s;
+}
+.nav-btn.next { background: #3b82f6; color: white; margin-left: auto; }
+.nav-btn.next:hover { background: #2563eb; }
+.nav-btn.prev { background: #f1f5f9; color: #475569; }
+.nav-btn.prev:hover { background: #e2e8f0; }
+
+/* ── STEP 1 ── */
+.word-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 24px; }
+.word-chip {
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  color: #475569;
+  position: relative;
+  transition: all 0.18s;
+  user-select: none;
+}
+.word-chip .idx {
+  position: absolute; top: -9px; left: 6px;
+  font-size: 9px; color: #94a3b8; font-family: monospace; font-weight: 400;
+}
+.word-chip.draggable {
+  border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; cursor: grab;
+}
+.word-chip.draggable:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(59,130,246,0.2); }
+.word-chip.drag-over { border-color: #3b82f6; background: #dbeafe; }
+.word-chip.dragging { opacity: 0.35; }
+.matrix-wrap { overflow-x: auto; }
+.matrix-title { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 10px; text-align: center; }
+.attn-table { border-collapse: collapse; margin: 0 auto; font-size: 13px; }
+.attn-table th { padding: 8px 14px; background: #f8fafc; font-weight: 600; color: #475569; border: 1px solid #e2e8f0; }
+.attn-table td { padding: 8px 14px; text-align: center; font-family: monospace; border: 1px solid #e2e8f0; transition: background 0.35s; }
+.attn-table td.row-hdr { background: #f8fafc; font-family: sans-serif; font-weight: 600; color: #475569; }
+.attn-table td.hl { background: #fef3c7 !important; font-weight: bold; border: 2px solid #f59e0b; color: #92400e; }
+.reset-btn {
+  padding: 7px 16px; border: 2px solid #e2e8f0; background: white; border-radius: 20px;
+  cursor: pointer; font-size: 12px; font-weight: 600; color: #64748b;
+  transition: all 0.2s; margin-bottom: 16px;
+}
+.reset-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+.score-badge {
+  display: inline-block; background: #fef3c7; border: 1px solid #fbbf24;
+  border-radius: 6px; padding: 4px 10px; font-family: monospace; font-weight: bold;
+  font-size: 14px; color: #92400e; margin-left: 8px;
+}
+
+/* ── STEP 2 ── */
+.s2-layout { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; margin-top: 20px; }
+.readout {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 14px; font-size: 13px; margin-top: 14px;
+}
+.readout .row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 7px; }
+.readout .lbl { color: #64748b; }
+.readout .val { font-family: monospace; font-weight: bold; color: #0f172a; }
+.distortion {
+  margin-top: 10px; padding: 9px 12px; border-radius: 7px;
+  font-weight: 700; font-size: 14px; text-align: center; transition: all 0.3s;
+}
+.dist-none { background: #dcfce7; color: #166534; }
+.dist-mod  { background: #fef9c3; color: #854d0e; }
+.dist-high { background: #fee2e2; color: #991b1b; }
+
+/* ── STEP 3 ── */
+.s3-layout { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; margin-top: 20px; }
+
+/* ── STEP 4 ── */
+.s4-layout { display: flex; gap: 36px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+.token-strip {
+  display: flex; flex-wrap: wrap; gap: 6px; background: #f8fafc;
+  padding: 14px; border-radius: 10px; margin-bottom: 22px;
+}
+.tok {
+  padding: 5px 10px; border-radius: 6px; font-family: monospace; font-size: 13px;
+  background: #f1f5f9; border: 2px solid transparent; color: #64748b;
+  transition: all 0.2s; position: relative;
+}
+.tok .ti { position: absolute; top: -9px; left: 4px; font-size: 9px; color: #94a3b8; }
+.tok.qa { background: #eff6ff; border-color: #3b82f6; color: #1e3a8a; font-weight: bold; }
+.tok.ka { background: #fef2f2; border-color: #ef4444; color: #7f1d1d; font-weight: bold; }
+.tok.ba { background: linear-gradient(90deg,#eff6ff 50%,#fef2f2 50%); border-color: #8b5cf6; font-weight: bold; }
+.stats-box {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 14px; font-size: 13px; margin-top: 14px;
+}
+.stats-box .row { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 7px; }
+.stats-box hr { border: none; border-top: 1px solid #e2e8f0; margin: 8px 0; }
+.dp-badge {
+  background: #fef08a; padding: 8px 12px; font-weight: bold; font-size: 16px;
+  border-radius: 6px; border: 1px solid #facc15; color: #854d0e; text-align: center; margin-top: 6px;
+}
+
+/* Shared */
+.ctrl-group { margin-bottom: 14px; }
+.ctrl-lbl { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #374151; }
+input[type="range"] { width: 100%; accent-color: #3b82f6; cursor: pointer; }
+.action-btn {
+  width: 100%; padding: 11px; border: none; border-radius: 8px;
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; margin-top: 2px;
+}
+.btn-green { background: #10b981; color: white; }
+.btn-green:hover { background: #059669; }
+canvas { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Understanding RoPE</h1>
+  <p>Rotary Positional Embeddings — An Interactive Guide</p>
+  <div class="step-nav">
+    <button class="step-btn active" id="nav-1" onclick="goToStep(1)">① The Permutation Problem</button>
+    <button class="step-btn" id="nav-2" onclick="goToStep(2)">② The Addition Flaw</button>
+    <button class="step-btn" id="nav-3" onclick="goToStep(3)">③ The Rotation Fix</button>
+    <button class="step-btn" id="nav-4" onclick="goToStep(4)">④ Relative Distance Payoff</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════ STEP 1 ═══════════════════ -->
+<div class="step-panel active" id="step-1">
+  <div class="card">
+    <div class="step-label">Step 1 of 4</div>
+    <div class="step-title">The Permutation Problem</div>
+    <div class="step-desc">
+      Raw self-attention has <strong>no concept of word order</strong> — it treats a sentence as an unordered set of tokens.
+      Drag <span style="color:#1d4ed8;font-weight:700;">dog</span> and
+      <span style="color:#1d4ed8;font-weight:700;">man</span> to swap them and watch what happens to the attention matrix.
+    </div>
+
+    <div style="margin-top:20px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+      <span style="font-size:13px; font-weight:600; color:#475569;">Word order:</span>
+      <div class="word-row" id="wordRow" style="margin-bottom:0;"></div>
+    </div>
+
+    <div style="margin:10px 0 18px; font-size:13px; color:#64748b;">
+      bit ↔ dog attention score:
+      <span class="score-badge" id="scoreBadge">0.82</span>
+      <span id="scoreNote" style="margin-left:8px; font-size:12px; color:#10b981; font-weight:600;"></span>
+    </div>
+
+    <div class="matrix-wrap">
+      <div class="matrix-title">QK<sup>T</sup> Attention Score Matrix &nbsp;—&nbsp; <span style="color:#f59e0b;">★ = "bit" ↔ "dog" score</span></div>
+      <table class="attn-table" id="attnTable"></table>
+    </div>
+
+    <div class="aha-box">
+      <strong>Notice</strong>
+      <p>After swapping, the matrix rows and columns shuffle to reflect the new token order, but the 0.82 score between "bit" and "dog" never changes. Standard attention is purely content based; it has no way to distinguish "The <em>dog</em> bit the <em>man</em>" from "The <em>man</em> bit the <em>dog</em>."</p>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn next" onclick="goToStep(2)">Next: The Addition Flaw →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ STEP 2 ═══════════════════ -->
+<div class="step-panel" id="step-2">
+  <div class="card">
+    <div class="step-label">Step 2 of 4</div>
+    <div class="step-title">The "Absolute Addition" Flaw</div>
+    <div class="step-desc">
+      The original Transformer adds a sinusoidal position vector directly to the word embedding.
+      Drag the slider to see how this <strong>corrupts "dog"'s semantic location</strong> in embedding space.
+    </div>
+
+    <div class="s2-layout">
+      <canvas id="s2canvas" width="370" height="370" style="border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); flex-shrink:0;"></canvas>
+      <div style="flex:1; min-width:200px;">
+        <div class="ctrl-group">
+          <label class="ctrl-lbl" for="s2slider">Position Index: <strong id="s2posval">0</strong></label>
+          <input type="range" id="s2slider" min="0" max="1000" value="0" step="1">
+        </div>
+        <div class="readout">
+          <div class="row"><span class="lbl">Semantic embedding:</span><span class="val" style="color:#3b82f6;">"dog" (fixed)</span></div>
+          <div class="row"><span class="lbl">Position vector |PE|:</span><span class="val" id="s2pemag">0.000</span></div>
+          <div class="row"><span class="lbl">Displacement from pos=0:</span><span class="val" id="s2disp">0.000</span></div>
+          <div class="distortion dist-none" id="s2distLabel">Semantic Distortion: None</div>
+        </div>
+        <div class="aha-box" style="margin-top:14px;">
+          <strong>Notice</strong>
+          <p>The same word "dog" ends up at a <em>completely different point</em> in embedding space depending on its position. Two identical words at different positions look semantically different to the model — addition corrupts content with location.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn prev" onclick="goToStep(1)">← Back</button>
+    <button class="nav-btn next" onclick="goToStep(3)">Next: The Rotation Fix →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ STEP 3 ═══════════════════ -->
+<div class="step-panel" id="step-3">
+  <div class="card">
+    <div class="step-label">Step 3 of 4</div>
+    <div class="step-title">The Rotary Mechanism</div>
+    <div class="step-desc">
+      Instead of adding a position vector, RoPE <strong>rotates</strong> the embedding vector by an angle proportional to its position.
+      The vector's length — its semantic magnitude — <em>never changes</em>.
+    </div>
+
+    <div class="s3-layout">
+      <canvas id="s3canvas" width="370" height="370" style="border-radius:50%; box-shadow:inset 0 0 12px rgba(0,0,0,0.06); flex-shrink:0;"></canvas>
+      <div style="flex:1; min-width:200px;">
+        <div class="ctrl-group">
+          <label class="ctrl-lbl" for="s3slider">Position Index (m): <strong id="s3posval">0</strong></label>
+          <input type="range" id="s3slider" min="0" max="20" value="0" step="1">
+        </div>
+        <div class="readout">
+          <div class="row"><span class="lbl">Rotation angle (mθ):</span><span class="val" id="s3angle">0.0°</span></div>
+          <div class="row"><span class="lbl">Vector x:</span><span class="val" id="s3vx">1.000</span></div>
+          <div class="row"><span class="lbl">Vector y:</span><span class="val" id="s3vy">0.000</span></div>
+          <div class="row">
+            <span class="lbl">Vector magnitude:</span>
+            <span class="val" id="s3mag" style="color:#10b981; font-weight:900;">1.000 ✓</span>
+          </div>
+        </div>
+        <div class="aha-box" style="margin-top:14px;">
+          <strong>Notice</strong>
+          <p>No matter what position you set, the magnitude stays exactly 1.000. Position is encoded as a <em>direction</em>, not a magnitude shift — the word's semantic strength is geometrically intact. The faint trails show every previous angle the vector has swept through.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn prev" onclick="goToStep(2)">← Back</button>
+    <button class="nav-btn next" onclick="goToStep(4)">Next: The Payoff →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ STEP 4 ═══════════════════ -->
+<div class="step-panel" id="step-4">
+  <div class="card">
+    <div class="step-label">Step 4 of 4</div>
+    <div class="step-title">The Relative Distance Payoff</div>
+    <div class="step-desc">
+      Absolute rotations yield <strong>relative distances</strong> automatically when you compute the attention dot product.
+      Shift both tokens forward — absolute angles change, dot product stays constant.
+    </div>
+
+    <div class="token-strip" id="tokenStrip"></div>
+
+    <div class="s4-layout">
+      <canvas id="s4canvas" width="330" height="330" style="border-radius:50%; box-shadow:inset 0 0 12px rgba(0,0,0,0.06); flex-shrink:0;"></canvas>
+      <div style="min-width:260px; flex:1;">
+        <div class="ctrl-group">
+          <label class="ctrl-lbl" style="color:#3b82f6;" for="s4posA">Query Token Position (m): <span id="s4posAval">1</span></label>
+          <input type="range" id="s4posA" min="0" max="15" value="1" step="1" style="accent-color:#3b82f6;">
+        </div>
+        <div class="ctrl-group">
+          <label class="ctrl-lbl" style="color:#ef4444;" for="s4posB">Key Token Position (n): <span id="s4posBval">3</span></label>
+          <input type="range" id="s4posB" min="0" max="15" value="3" step="1" style="accent-color:#ef4444;">
+        </div>
+        <button class="action-btn btn-green" id="s4shiftBtn">⟳ Shift Both Forward +1</button>
+        <div class="stats-box">
+          <div class="row"><span>Base angle (θ):</span><span>22.5°</span></div>
+          <div class="row" style="color:#3b82f6;"><span>Angle A (mθ):</span><span id="s4degA">22.5°</span></div>
+          <div class="row" style="color:#ef4444;"><span>Angle B (nθ):</span><span id="s4degB">67.5°</span></div>
+          <hr>
+          <div class="row"><span>Relative diff (n−m)θ:</span><span id="s4degDiff">45.0°</span></div>
+          <div class="dp-badge">Dot Product: <span id="s4dot">0.707</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" style="margin-top:20px;">
+      <strong>The Grand Insight</strong>
+      <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes — because <strong>cos((n−m)θ)</strong> depends only on the gap between tokens, not their absolute positions. This is RoPE's core mathematical guarantee: attention scores encode relative, not absolute, positions.</p>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn prev" onclick="goToStep(3)">← Back</button>
+  </div>
+</div>
+
+</div><!-- .main -->
+
+<script>
+// ─────────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────────
+let currentStep = 1;
+const stepInits = { 2: false, 3: false, 4: false };
+
+function goToStep(n) {
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('nav-' + currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+  document.getElementById('nav-' + n).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 2 && !stepInits[2]) { initStep2(); stepInits[2] = true; }
+  if (n === 3 && !stepInits[3]) { initStep3(); stepInits[3] = true; }
+  if (n === 4 && !stepInits[4]) { initStep4(); stepInits[4] = true; }
+}
+
+
+// ─────────────────────────────────────────────
+//  STEP 1 — PERMUTATION PROBLEM
+// ─────────────────────────────────────────────
+const SCORES = {
+  'The-The':0.95, 'The-dog':0.28, 'The-bit':0.18, 'The-the':0.87, 'The-man':0.34,
+  'dog-dog':0.95, 'dog-bit':0.82, 'dog-the':0.21, 'dog-man':0.47,
+  'bit-bit':0.95, 'bit-the':0.11, 'bit-man':0.74,
+  'the-the':0.95, 'the-man':0.31,
+  'man-man':0.95
+};
+
+function getScore(a, b) {
+  return SCORES[a+'-'+b] ?? SCORES[b+'-'+a] ?? 0.50;
+}
+
+let wordOrder = ['The','dog','bit','the','man'];
+let dragSrc = null;
+let swapped = false;
+
+function heatColor(v) {
+  const r = Math.round(235 - v * 150);
+  const g = Math.round(245 - v * 80);
+  const b = 255;
+  return `rgb(${r},${g},${b})`;
+}
+
+function buildWordRow() {
+  const row = document.getElementById('wordRow');
+  row.innerHTML = '';
+  wordOrder.forEach((word, i) => {
+    const chip = document.createElement('div');
+    const isDraggable = word === 'dog' || word === 'man';
+    chip.className = 'word-chip' + (isDraggable ? ' draggable' : '');
+    chip.innerHTML = `<span class="idx">${i}</span>${word}`;
+    chip.dataset.i = i;
+    if (isDraggable) {
+      chip.draggable = true;
+      chip.addEventListener('dragstart', e => {
+        dragSrc = i;
+        chip.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    }
+    chip.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (isDraggable) chip.classList.add('drag-over');
+    });
+    chip.addEventListener('dragleave', () => chip.classList.remove('drag-over'));
+    chip.addEventListener('drop', e => {
+      e.preventDefault();
+      chip.classList.remove('drag-over');
+      if (dragSrc !== null && dragSrc !== i && isDraggable) {
+        [wordOrder[dragSrc], wordOrder[i]] = [wordOrder[i], wordOrder[dragSrc]];
+        swapped = !swapped;
+        buildWordRow();
+        buildMatrix();
+        updateScoreBadge();
+      }
+      dragSrc = null;
+    });
+    row.appendChild(chip);
+  });
+}
+
+function updateScoreBadge() {
+  const note = document.getElementById('scoreNote');
+  note.textContent = swapped ? '(still 0.82 — just moved to a new cell!)' : '';
+}
+
+function buildMatrix() {
+  const tbl = document.getElementById('attnTable');
+  tbl.innerHTML = '';
+  // Header
+  const thead = tbl.createTHead();
+  const hr = thead.insertRow();
+  const corner = document.createElement('th');
+  corner.textContent = 'Q \\ K';
+  hr.appendChild(corner);
+  wordOrder.forEach(w => {
+    const th = document.createElement('th');
+    th.textContent = w;
+    hr.appendChild(th);
+  });
+  // Body
+  const tbody = tbl.createTBody();
+  wordOrder.forEach(rw => {
+    const tr = tbody.insertRow();
+    const rh = tr.insertCell();
+    rh.className = 'row-hdr';
+    rh.textContent = rw;
+    wordOrder.forEach(cw => {
+      const td = tr.insertCell();
+      const s = getScore(rw, cw);
+      td.style.background = heatColor(s);
+      const isBitDog = (rw === 'bit' && cw === 'dog') || (rw === 'dog' && cw === 'bit');
+      if (isBitDog) {
+        td.className = 'hl';
+        td.textContent = '0.82 ★';
+      } else {
+        td.textContent = s.toFixed(2);
+      }
+    });
+  });
+}
+
+function resetStep1() {
+  wordOrder = ['The','dog','bit','the','man'];
+  swapped = false;
+  buildWordRow();
+  buildMatrix();
+  updateScoreBadge();
+}
+
+buildWordRow();
+buildMatrix();
+
+
+// ─────────────────────────────────────────────
+//  STEP 2 — ABSOLUTE ADDITION FLAW
+// ─────────────────────────────────────────────
+function initStep2() {
+  const canvas = document.getElementById('s2canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const scale = 62;
+
+  // Fixed semantic position of "dog"
+  const semX = 0.9, semY = 0.75;
+
+  // Neighbor words in semantic space
+  const neighbors = [
+    { label: '"cat"',  x: 1.55, y: 0.45 },
+    { label: '"wolf"', x: 0.45, y: 1.15 },
+    { label: '"bird"', x: 1.30, y: 1.20 },
+    { label: '"fox"',  x: 0.55, y: 0.35 },
+  ];
+
+  // PE as two sin components that both start at 0
+  function getPE(pos) {
+    const px = Math.sin(pos / 55)  * 1.4;
+    const py = Math.sin(pos / 180) * 1.4;
+    return { px, py };
+  }
+
+  function toCanvas(mx, my) {
+    return { x: cx + mx * scale, y: cy - my * scale };
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, width) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke();
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    const hl = 10;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - hl * Math.cos(ang - Math.PI/6), y2 - hl * Math.sin(ang - Math.PI/6));
+    ctx.lineTo(x2 - hl * Math.cos(ang + Math.PI/6), y2 - hl * Math.sin(ang + Math.PI/6));
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function draw2() {
+    const pos = parseInt(document.getElementById('s2slider').value);
+    document.getElementById('s2posval').textContent = pos;
+    const { px, py } = getPE(pos);
+    const rx = semX + px, ry = semY + py;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid
+    ctx.strokeStyle = '#e8edf3'; ctx.lineWidth = 1;
+    for (let g = -4; g <= 4; g++) {
+      ctx.beginPath(); ctx.moveTo(cx + g*scale, 0); ctx.lineTo(cx + g*scale, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, cy - g*scale); ctx.lineTo(W, cy - g*scale); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Semantic Dim 1', cx, H - 6);
+    ctx.save(); ctx.translate(12, cy); ctx.rotate(-Math.PI/2);
+    ctx.fillText('Semantic Dim 2', 0, 0); ctx.restore();
+    ctx.textAlign = 'left';
+
+    // Semantic neighborhood circle
+    const sem = toCanvas(semX, semY);
+    ctx.beginPath();
+    ctx.arc(sem.x, sem.y, scale * 0.85, 0, 2*Math.PI);
+    ctx.strokeStyle = 'rgba(59,130,246,0.18)'; ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(59,130,246,0.04)'; ctx.fill();
+    ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
+    ctx.fillText('animal words cluster', sem.x - 44, sem.y - scale * 0.9);
+
+    // Neighbor dots
+    neighbors.forEach(n => {
+      const nc = toCanvas(n.x, n.y);
+      ctx.beginPath();
+      ctx.arc(nc.x, nc.y, 5, 0, 2*Math.PI);
+      ctx.fillStyle = 'rgba(59,130,246,0.35)'; ctx.fill();
+      ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+      ctx.fillText(n.label, nc.x + 7, nc.y + 4);
+    });
+
+    // Position vector arrow (from semantic dot to result)
+    if (pos > 0) {
+      const res = toCanvas(rx, ry);
+      drawArrow(ctx, sem.x, sem.y, res.x, res.y, '#ef4444', 2.5);
+      ctx.fillStyle = '#ef4444'; ctx.font = 'bold 11px sans-serif';
+      const mx = (sem.x + res.x) / 2 + 6, my = (sem.y + res.y) / 2 - 7;
+      ctx.fillText('+ PE(pos)', mx, my);
+
+      // Result dot (purple)
+      ctx.beginPath(); ctx.arc(res.x, res.y, 9, 0, 2*Math.PI);
+      ctx.fillStyle = '#7c3aed'; ctx.fill();
+      ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#5b21b6'; ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('"dog"', res.x + 12, res.y - 4);
+      ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+      ctx.fillText('pos=' + pos, res.x + 12, res.y + 10);
+    }
+
+    // Original blue dot
+    ctx.beginPath(); ctx.arc(sem.x, sem.y, 9, 0, 2*Math.PI);
+    ctx.fillStyle = '#3b82f6'; ctx.fill();
+    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#1d4ed8'; ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('"dog"', sem.x + 12, sem.y - 4);
+    ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+    ctx.fillText('pos=0', sem.x + 12, sem.y + 10);
+
+    // Update readout
+    const mag = Math.sqrt(px*px + py*py);
+    const disp = Math.sqrt((rx - semX)**2 + (ry - semY)**2);
+    document.getElementById('s2pemag').textContent = mag.toFixed(3);
+    document.getElementById('s2disp').textContent = disp.toFixed(3);
+    const dl = document.getElementById('s2distLabel');
+    if (disp < 0.25) {
+      dl.className = 'distortion dist-none'; dl.textContent = 'Semantic Distortion: None';
+    } else if (disp < 0.85) {
+      dl.className = 'distortion dist-mod'; dl.textContent = 'Semantic Distortion: Moderate';
+    } else {
+      dl.className = 'distortion dist-high'; dl.textContent = 'Semantic Distortion: High!';
+    }
+  }
+
+  document.getElementById('s2slider').addEventListener('input', draw2);
+  draw2();
+}
+
+
+// ─────────────────────────────────────────────
+//  STEP 3 — ROTATION MECHANISM
+// ─────────────────────────────────────────────
+function initStep3() {
+  const canvas = document.getElementById('s3canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = 148;
+  const theta = Math.PI / 8;
+
+  function draw3() {
+    const pos = parseInt(document.getElementById('s3slider').value);
+    document.getElementById('s3posval').textContent = pos;
+    const angle = pos * theta;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Background circle fill
+    ctx.beginPath(); ctx.arc(cx, cy, R + 8, 0, 2*Math.PI);
+    ctx.fillStyle = '#fafbfc'; ctx.fill();
+
+    // Unit circle
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Axes
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - R - 14, cy); ctx.lineTo(cx + R + 14, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - R - 14); ctx.lineTo(cx, cy + R + 14); ctx.stroke();
+
+    // Ghost trails
+    for (let p = 0; p < pos; p++) {
+      const a = p * theta;
+      const tx = cx + R * Math.cos(-a);
+      const ty = cy + R * Math.sin(-a);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty);
+      ctx.strokeStyle = 'rgba(59,130,246,0.10)'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(tx, ty, 3.5, 0, 2*Math.PI);
+      ctx.fillStyle = 'rgba(59,130,246,0.15)'; ctx.fill();
+    }
+
+    // Swept arc
+    if (pos > 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * 0.28, 0, -angle, true);
+      ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3; ctx.stroke();
+      const midA = -angle / 2;
+      ctx.fillStyle = '#10b981'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText((angle * 180 / Math.PI).toFixed(1) + '°', cx + R*0.44*Math.cos(midA), cy + R*0.44*Math.sin(midA) + 4);
+      ctx.textAlign = 'left';
+    }
+
+    // Main vector
+    const vx = cx + R * Math.cos(-angle);
+    const vy = cy + R * Math.sin(-angle);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(vx, vy);
+    ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3.5; ctx.stroke();
+
+    // Arrowhead
+    const al = Math.atan2(vy - cy, vx - cx);
+    const hl = 12;
+    ctx.beginPath();
+    ctx.moveTo(vx, vy);
+    ctx.lineTo(vx - hl*Math.cos(al - Math.PI/6), vy - hl*Math.sin(al - Math.PI/6));
+    ctx.lineTo(vx - hl*Math.cos(al + Math.PI/6), vy - hl*Math.sin(al + Math.PI/6));
+    ctx.fillStyle = '#3b82f6'; ctx.fill();
+
+    // Tip dot
+    ctx.beginPath(); ctx.arc(vx, vy, 6, 0, 2*Math.PI);
+    ctx.fillStyle = '#3b82f6'; ctx.fill();
+    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Label
+    const lx = cx + (R + 22) * Math.cos(-angle);
+    const ly = cy + (R + 22) * Math.sin(-angle);
+    ctx.fillStyle = '#1d4ed8'; ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('m=' + pos, lx, ly + 4); ctx.textAlign = 'left';
+
+    // Readout
+    const vxm = Math.cos(-angle), vym = Math.sin(-angle);
+    const mag = Math.sqrt(vxm*vxm + vym*vym);
+    document.getElementById('s3angle').textContent = (angle * 180 / Math.PI).toFixed(1) + '°';
+    document.getElementById('s3vx').textContent = vxm.toFixed(3);
+    document.getElementById('s3vy').textContent = (-vym).toFixed(3);
+    document.getElementById('s3mag').textContent = mag.toFixed(3) + ' ✓';
+  }
+
+  document.getElementById('s3slider').addEventListener('input', draw3);
+  draw3();
+}
+
+
+// ─────────────────────────────────────────────
+//  STEP 4 — RELATIVE DISTANCE PAYOFF
+// ─────────────────────────────────────────────
+function initStep4() {
+  const words = ["The","quick","brown","fox","jumps","over","the","lazy","dog","and","runs","away","into","the","deep","woods."];
+  const strip = document.getElementById('tokenStrip');
+  const toks = [];
+  words.forEach((w, i) => {
+    const s = document.createElement('span');
+    s.className = 'tok';
+    s.innerHTML = `<span class="ti">${i}</span>${w}`;
+    strip.appendChild(s); toks.push(s);
+  });
+
+  const canvas = document.getElementById('s4canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = 118;
+  const theta = Math.PI / 8;
+
+  const posA = document.getElementById('s4posA');
+  const posB = document.getElementById('s4posB');
+
+  function draw4() {
+    const ma = parseInt(posA.value), mb = parseInt(posB.value);
+    document.getElementById('s4posAval').textContent = ma;
+    document.getElementById('s4posBval').textContent = mb;
+
+    toks.forEach((t, i) => {
+      t.className = 'tok';
+      if (i === ma && i === mb) t.className = 'tok ba';
+      else if (i === ma) t.className = 'tok qa';
+      else if (i === mb) t.className = 'tok ka';
+    });
+
+    const aa = ma * theta, ab = mb * theta;
+    const diff = ab - aa;
+    document.getElementById('s4degA').textContent = (aa * 180/Math.PI).toFixed(1) + '°';
+    document.getElementById('s4degB').textContent = (ab * 180/Math.PI).toFixed(1) + '°';
+    document.getElementById('s4degDiff').textContent = (Math.abs(diff) * 180/Math.PI).toFixed(1) + '°';
+    document.getElementById('s4dot').textContent = Math.cos(diff).toFixed(3);
+
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.beginPath(); ctx.arc(cx, cy, R + 8, 0, 2*Math.PI);
+    ctx.fillStyle = '#fafbfc'; ctx.fill();
+
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - R - 14, cy); ctx.lineTo(cx + R + 14, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - R - 14); ctx.lineTo(cx, cy + R + 14); ctx.stroke();
+
+    // Green arc (relative)
+    const arcStart = Math.min(-aa, -ab);
+    const arcEnd = Math.max(-aa, -ab);
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.32, arcStart, arcEnd);
+    ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3; ctx.stroke();
+
+    drawVec4(aa, '#3b82f6', 'Q(m)');
+    drawVec4(ab, '#ef4444', 'K(n)');
+  }
+
+  function drawVec4(ang, color, lbl) {
+    const x = cx + R * Math.cos(-ang);
+    const y = cy + R * Math.sin(-ang);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y);
+    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+    const al = Math.atan2(y - cy, x - cx), hl = 10;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - hl*Math.cos(al - Math.PI/6), y - hl*Math.sin(al - Math.PI/6));
+    ctx.lineTo(x - hl*Math.cos(al + Math.PI/6), y - hl*Math.sin(al + Math.PI/6));
+    ctx.fillStyle = color; ctx.fill();
+    const lx = cx + (R + 20) * Math.cos(-ang);
+    const ly = cy + (R + 20) * Math.sin(-ang);
+    ctx.fillStyle = color; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+    ctx.fillText(lbl, lx, ly + 4); ctx.textAlign = 'left';
+  }
+
+  posA.addEventListener('input', draw4);
+  posB.addEventListener('input', draw4);
+
+  document.getElementById('s4shiftBtn').addEventListener('click', () => {
+    let a = parseInt(posA.value), b = parseInt(posB.value);
+    if (a < 15 && b < 15) {
+      posA.value = a + 1; posB.value = b + 1;
+    } else {
+      const d = b - a; posA.value = 0; posB.value = Math.max(0, d);
+    }
+    draw4();
+  });
+
+  draw4();
+}
+</script>
+</body>
+</html>

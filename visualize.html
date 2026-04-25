@@ -229,6 +229,191 @@ canvas { display: block; }
 .s5-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
 .s5-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #374151; font-weight: 600; }
 .s5-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── STEP 5 — PIPELINE DIAGRAM ── */
+.rope-pipeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24px 0;
+  gap: 0;
+}
+.pipe-node {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  min-width: 280px;
+}
+.pipe-node-inner {
+  background: #f0f7ff;
+  border-color: #93c5fd;
+  min-width: 260px;
+}
+.pipe-node-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #64748b;
+  margin-top: 3px;
+}
+.pipe-arrow-v {
+  font-size: 20px;
+  color: #94a3b8;
+  line-height: 1;
+  margin: 3px 0;
+  user-select: none;
+}
+.pipe-transformer-block {
+  border: 2px dashed #3b82f6;
+  border-radius: 14px;
+  padding: 14px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  background: #eff6ff;
+  min-width: 360px;
+  position: relative;
+}
+.pipe-block-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #3b82f6;
+  margin-bottom: 10px;
+  background: #eff6ff;
+  padding: 2px 8px;
+}
+.pipe-qkv-row {
+  display: flex;
+  gap: 8px;
+  margin: 2px 0 2px;
+}
+.pipe-qkv-box {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  min-width: 56px;
+}
+.pipe-qkv-q { background: #dbeafe; border: 2px solid #3b82f6; color: #1d4ed8; }
+.pipe-qkv-k { background: #dbeafe; border: 2px solid #3b82f6; color: #1d4ed8; }
+.pipe-qkv-v { background: #f1f5f9; border: 2px solid #94a3b8; color: #475569; }
+.pipe-rope-inject {
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 13px;
+  margin: 2px 0;
+  min-width: 300px;
+}
+.inject-star {
+  font-size: 11px;
+  font-weight: 800;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+.inject-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  justify-content: center;
+}
+.inject-qk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 14px;
+  background: #dbeafe;
+  border: 1.5px solid #93c5fd;
+  border-radius: 8px 0 0 8px;
+  flex: 1;
+}
+.inject-v {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  flex: 1;
+}
+.inject-qk-labels { display: flex; gap: 8px; }
+.inject-label-qk {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: white;
+  border: 1.5px solid #93c5fd;
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+.inject-label-v {
+  font-size: 14px;
+  font-weight: 800;
+  color: #475569;
+  background: white;
+  border: 1.5px solid #94a3b8;
+  border-radius: 6px;
+  padding: 2px 10px;
+}
+.inject-sub {
+  font-size: 10px;
+  color: #1d4ed8;
+  font-weight: 600;
+  margin-top: 1px;
+}
+.inject-sub-v {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 1px;
+}
+.pipe-attn-node {
+  background: #ecfdf5;
+  border: 2px solid #10b981;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #065f46;
+  text-align: center;
+  min-width: 260px;
+}
+.pipe-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 20px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pipe-section-divider::before,
+.pipe-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
 </style>
 </head>
 <body>
@@ -253,7 +438,7 @@ canvas { display: block; }
     <div class="step-label">Step 1 of 5</div>
     <div class="step-title">The Permutation Problem</div>
     <div class="step-desc">
-      Raw self-attention has <strong>no concept of word order</strong> — it treats a sentence as an unordered set of tokens.
+      Raw self attention has <strong>no concept of word order</strong>, it treats a sentence as an unordered set of tokens.
       Drag <span style="color:#1d4ed8;font-weight:700;">dog</span> and
       <span style="color:#1d4ed8;font-weight:700;">man</span> to swap them and watch what happens to the attention matrix.
     </div>
@@ -317,7 +502,7 @@ canvas { display: block; }
         </div>
         <div class="aha-box" style="margin-top:14px;">
           <strong>Notice</strong>
-          <p>The same word "dog" ends up at a <em>completely different point</em> in embedding space depending on its position. Two identical words at different positions look semantically different to the model — addition corrupts content with location.</p>
+          <p>The same word "dog" ends up at a different point in embedding space depending on its position. Two identical words at different positions look semantically different to the model, addition corrupts content with location.</p>
         </div>
       </div>
     </div>
@@ -357,7 +542,7 @@ canvas { display: block; }
     <div class="step-title">The Rotary Mechanism</div>
     <div class="step-desc">
       Instead of adding a position vector, RoPE <strong>rotates</strong> the embedding vector by an angle proportional to its position.
-      The vector's length — its semantic magnitude — <em>never changes</em>.
+      The vector's length, its semantic magnitude, never changes.
     </div>
 
     <div class="s3-layout">
@@ -378,7 +563,7 @@ canvas { display: block; }
         </div>
         <div class="aha-box" style="margin-top:14px;">
           <strong>Notice</strong>
-          <p>No matter what position you set, the magnitude stays exactly 1.000. Position is encoded as a <em>direction</em>, not a magnitude shift — the word's semantic strength is geometrically intact. The faint trails show every previous angle the vector has swept through.</p>
+          <p>No matter what position you set, the magnitude stays exactly 1.000. Position is encoded as a <em>direction</em>, not a magnitude shift, the word's semantic strength is geometrically intact. The faint trails show every previous angle the vector has swept through.</p>
         </div>
       </div>
     </div>
@@ -426,7 +611,7 @@ canvas { display: block; }
 
     <div class="aha-box" style="margin-top:20px;">
       <strong>The Grand Insight</strong>
-      <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes because cos((n−m)θ) depends only on the gap between tokens, not their absolute positions. This is RoPE's core mathematical guarantee: attention scores encode relative, not absolute, positions.</p>
+      <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes because cos((n−m)θ) depends only on the gap between tokens, not their absolute positions. This is RoPE's guarantee: attention scores encode relative, not absolute, positions.</p>
     </div>
   </div>
   <div class="nav-buttons">
@@ -439,11 +624,90 @@ canvas { display: block; }
 <div class="step-panel" id="step-5">
   <div class="card">
     <div class="step-label">Step 5 of 5</div>
-    <div class="step-title">Under the Hood: Matrix Application</div>
+    <div class="step-title">Where &amp; How RoPE Is Applied</div>
     <div class="step-desc">
-      RoPE applies a unique <strong>2×2 rotation matrix</strong> to each pair of embedding dimensions.
-      Click a token from <em>"The dog bit the man"</em> to load its embedding, then click a pair to drill into the rotation equation.
+      Position is <strong>not</strong> injected at the start. Word embeddings stay purely semantic.
+      RoPE is applied <strong>inside every attention layer</strong> — and only to the Query and Key tensors, never the Values.
     </div>
+
+    <!-- Pipeline diagram -->
+    <div class="rope-pipeline">
+
+      <!-- Tokenization -->
+      <div class="pipe-node">
+        Tokenization
+        <div class="pipe-node-sub">Text → Integer token IDs</div>
+      </div>
+      <div class="pipe-arrow-v">↓</div>
+
+      <!-- Word Embedding -->
+      <div class="pipe-node">
+        Word Embedding
+        <div class="pipe-node-sub">IDs → Dense semantic vectors &nbsp;<em>(position-free)</em></div>
+      </div>
+      <div class="pipe-arrow-v">↓</div>
+
+      <!-- Transformer Block -->
+      <div class="pipe-transformer-block">
+        <div class="pipe-block-label">Transformer Block &nbsp;(loops for N layers)</div>
+
+        <!-- Linear Projection -->
+        <div class="pipe-node pipe-node-inner">
+          Linear Projection
+          <div class="pipe-node-sub">Hidden state × weight matrices → Q, K, V</div>
+        </div>
+        <div class="pipe-arrow-v">↓</div>
+
+        <!-- Q K V split -->
+        <div class="pipe-qkv-row">
+          <div class="pipe-qkv-box pipe-qkv-q">Q</div>
+          <div class="pipe-qkv-box pipe-qkv-k">K</div>
+          <div class="pipe-qkv-box pipe-qkv-v">V</div>
+        </div>
+        <div class="pipe-arrow-v">↓</div>
+
+        <!-- RoPE injection highlight -->
+        <div class="pipe-rope-inject">
+          <div class="inject-star">★ &nbsp;Position Injection: RoPE rotation applied here</div>
+          <div class="inject-row">
+            <div class="inject-qk">
+              <div class="inject-qk-labels">
+                <div class="inject-label-qk">RoPE(Q)</div>
+                <div class="inject-label-qk">RoPE(K)</div>
+              </div>
+              <div class="inject-sub">Rotation matrix applied — encodes position</div>
+            </div>
+            <div class="inject-v">
+              <div class="inject-label-v">V</div>
+              <div class="inject-sub-v">Left unchanged — carries content</div>
+            </div>
+          </div>
+        </div>
+        <div class="pipe-arrow-v">↓</div>
+
+        <!-- Attention Calculation -->
+        <div class="pipe-attn-node">
+          Attention scores: &nbsp;RoPE(Q) · RoPE(K)<sup>T</sup> &nbsp;/&nbsp; √d
+          <div style="font-size:11px; color:#065f46; font-weight:400; margin-top:4px;">
+            Scores multiplied by the <em>unrotated</em> V to produce output
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow-v">↓</div>
+      <!-- Output -->
+      <div class="pipe-node">
+        Output
+        <div class="pipe-node-sub">Passed to next layer (or final result)</div>
+      </div>
+    </div><!-- /.rope-pipeline -->
+
+    <div class="aha-box">
+      <strong>Notice</strong>
+      <p>Because only Q and K are rotated, the dot product Q·K<sup>T</sup> encodes the relative angle between positions — giving the model position aware attention scores. V is never rotated: it carries raw content, not position. This is why RoPE generalises to longer sequences than those seen during training.</p>
+    </div>
+
+    <div class="pipe-section-divider">Now see the rotation math in action</div>
 
     <!-- Token strip -->
     <div style="margin-top: 20px; margin-bottom: 6px;">
@@ -562,7 +826,7 @@ canvas { display: block; }
 
     <div class="aha-box" style="margin-top:16px;">
       <strong>Notice</strong>
-      <p>Each pair uses a <em>different frequency</em>: Pair 0 (i=0) rotates fastest — by <em>m</em> radians per step — while Pair 3 (i=3) barely moves. This multi-scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
+      <p>Each pair uses a <em>different frequency</em>: Pair 0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair 3 (i=3) barely moves. This multi scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
     </div>
   </div>
   <div class="nav-buttons">

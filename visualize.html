@@ -460,7 +460,6 @@ canvas { display: block; }
     </div>
 
     <div class="aha-box">
-      <strong>Notice</strong>
       <p>After swapping, the matrix rows and columns shuffle to reflect the new token order, but the 0.82 score between "bit" and "dog" never changes. Standard attention is purely content based; it has no way to distinguish "The <em>dog</em> bit the <em>man</em>" from "The <em>man</em> bit the <em>dog</em>."</p>
     </div>
   </div>
@@ -501,7 +500,6 @@ canvas { display: block; }
           <div class="distortion dist-none" id="s2distLabel">Semantic Distortion: None</div>
         </div>
         <div class="aha-box" style="margin-top:14px;">
-          <strong>Notice</strong>
           <p>The same word "dog" ends up at a different point in embedding space depending on its position. Two identical words at different positions look semantically different to the model, addition corrupts content with location.</p>
         </div>
       </div>
@@ -510,7 +508,7 @@ canvas { display: block; }
     <!-- Wave charts showing PE components -->
     <div style="margin-top:20px; background:white; border-radius:12px; padding:20px 24px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
       <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:3px;">The two sinusoidal frequencies driving the red dot:</div>
-      <div style="font-size:12px; color:#64748b; margin-bottom:16px;">The slider picks instantaneous values off these waves — one sets x-offset, the other sets y-offset.</div>
+      <div style="font-size:12px; color:#64748b; margin-bottom:16px;">The slider picks instantaneous values off these waves, one sets x-offset, the other sets y-offset.</div>
 
       <div style="margin-bottom:14px;">
         <div style="font-size:12px; font-weight:700; color:#ef4444; margin-bottom:5px;">
@@ -562,7 +560,6 @@ canvas { display: block; }
           </div>
         </div>
         <div class="aha-box" style="margin-top:14px;">
-          <strong>Notice</strong>
           <p>No matter what position you set, the magnitude stays exactly 1.000. Position is encoded as a <em>direction</em>, not a magnitude shift, the word's semantic strength is geometrically intact. The faint trails show every previous angle the vector has swept through.</p>
         </div>
       </div>
@@ -610,7 +607,6 @@ canvas { display: block; }
     </div>
 
     <div class="aha-box" style="margin-top:20px;">
-      <strong>The Grand Insight</strong>
       <p>Hit "Shift Both Forward +1" repeatedly. The individual angles keep growing, but the dot product never changes because cos((n−m)θ) depends only on the gap between tokens, not their absolute positions. This is RoPE's guarantee: attention scores encode relative, not absolute, positions.</p>
     </div>
   </div>
@@ -703,7 +699,6 @@ canvas { display: block; }
     </div><!-- /.rope-pipeline -->
 
     <div class="aha-box">
-      <strong>Notice</strong>
       <p>Because only Q and K are rotated, the dot product Q·K<sup>T</sup> encodes the relative angle between positions — giving the model position aware attention scores. V is never rotated: it carries raw content, not position. This is why RoPE generalises to longer sequences than those seen during training.</p>
     </div>
 
@@ -825,7 +820,6 @@ canvas { display: block; }
     </div>
 
     <div class="aha-box" style="margin-top:16px;">
-      <strong>Notice</strong>
       <p>Each pair uses a <em>different frequency</em>: Pair 0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair 3 (i=3) barely moves. This multi scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
     </div>
   </div>

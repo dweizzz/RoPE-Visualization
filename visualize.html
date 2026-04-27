@@ -768,14 +768,14 @@ canvas { display: block; }
     </div><!-- /.rope-pipeline -->
 
     <div class="aha-box">
-      <p>Because only Q and K are rotated, the dot product Q·K<sup>T</sup> encodes the relative angle between positions — giving the model position aware attention scores. V is never rotated: it carries raw content, not position. This is why RoPE generalises to longer sequences than those seen during training.</p>
+      <p>Because only Q and K are rotated, the dot product Q·K<sup>T</sup> encodes the relative angle between positions, giving the model position aware attention scores. V is never rotated: it carries raw content, not position. This is why RoPE generalises to longer sequences than those seen during training.</p>
     </div>
 
     <div class="pipe-section-divider">The Inspector — Rotating Real Embeddings</div>
 
     <!-- ══ INSPECTOR SECTION ══ -->
     <div style="margin-top: 20px; margin-bottom: 6px;">
-      <div class="s5-embed-label" style="margin-bottom: 8px;">Select a token — its 8-dim embedding is split into 4 pairs and rotated by its actual position in the sentence:</div>
+      <div class="s5-embed-label" style="margin-bottom: 8px;">Select a token, its 8-dim embedding is split into 4 pairs and rotated by its actual position in the sentence:</div>
       <div class="token-strip" id="s5tokenStrip" style="margin-bottom: 0;"></div>
       <div style="margin-top: 10px; font-size: 13px; color: #64748b;">
         Encoding: <strong id="s5tokenWord" style="color: #0f172a;">"dog"</strong>
@@ -800,13 +800,13 @@ canvas { display: block; }
 
     <div class="why-2d-box">
       <strong>Why split into 2D pairs?</strong>
-      <p>A large embedding (e.g. d&nbsp;=&nbsp;4096) is sliced into <em>d/2</em> consecutive pairs. 2D rotations are mathematically elegant and computationally cheap — a single 2&times;2 matrix multiply per pair. Each pair rotates at a <em>different frequency</em>: fast-rotating pairs (low i) track precise local word order, while slow-rotating pairs (high i) capture broad, global document structure. Together they give the model a multi-scale positional clock that spans both nearby and distant token relationships.</p>
+      <p>A large embedding (e.g. d&nbsp;=&nbsp;4096) is sliced into <em>d/2</em> consecutive pairs. 2D rotations are mathematically elegant and computationally cheap, a single 2&times;2 matrix multiply per pair. Each pair rotates at a <em>different frequency</em>: fast-rotating pairs (low i) track precise local word order, while slow rotating pairs (high i) capture broad, global document structure. Together they give the model a multi scale positional clock that spans both nearby and distant token relationships.</p>
     </div>
 
     <!-- ══ SANDBOX SECTION ══ -->
     <div class="sandbox-section">
-      <div class="sandbox-heading">Sandbox Mode: The Multi-Scale Clock</div>
-      <div class="sandbox-desc">Let's leave the sentence behind and look at the pure math. We'll use a fixed abstract vector [0.8,&nbsp;0.6]. Change the Pair Index (i) and the Position (m) below. Notice how Pair&nbsp;0 (high frequency) spins wildly as m increases, while Pair&nbsp;3 (low frequency) barely ticks. This is how RoPE tracks both local and global distances!</div>
+      <div class="sandbox-heading">Sandbox Mode: The Multi Scale Clock</div>
+      <div class="sandbox-desc">Let's leave the sentence behind and look at the math. We'll use a fixed abstract vector [0.8,&nbsp;0.6]. Change the Pair Index (i) and the Position (m) below. Notice how Pair&nbsp;0 (high frequency) spins quickly as m increases, while Pair&nbsp;3 (low frequency) barely ticks. This is how RoPE tracks both local and global distances.</div>
 
       <div class="sandbox-controls">
         <div class="ctrl-group" style="margin-bottom:0; flex:1; min-width:200px;">
@@ -907,14 +907,14 @@ canvas { display: block; }
       </div><!-- /.s5-main-layout -->
 
       <div class="aha-box" style="margin-top:16px;">
-        <p>Each pair uses a <em>different frequency</em>: Pair&nbsp;0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair&nbsp;3 (i=3) barely moves. This multi-scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
+        <p>Each pair uses a <em>different frequency</em>: Pair&nbsp;0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair&nbsp;3 (i=3) barely moves. This multi scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
       </div>
     </div><!-- /.sandbox-section -->
 
     <div class="resolution-divider">The Resolution — RoPE Solves The Permutation Problem</div>
 
     <div style="margin-bottom:14px;">
-      <div class="step-desc">Back in Step&nbsp;1, swapping <strong style="color:#1d4ed8;">dog</strong> and <strong style="color:#1d4ed8;">man</strong> never changed the attention score — 0.82, always. Now try it here. RoPE encodes position as a rotation, so moving "dog" shifts its angle and changes its relative distance to "bit". The score <em>will</em> change.</div>
+      <div class="step-desc">Back in Step&nbsp;1, swapping <strong style="color:#1d4ed8;">dog</strong> and <strong style="color:#1d4ed8;">man</strong> never changed the attention score — 0.82, always. Now try it here. RoPE encodes position as a rotation, so moving "dog" shifts its angle and changes its relative distance to "bit". The score changes!</div>
     </div>
 
     <div style="margin-top:16px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -934,7 +934,6 @@ canvas { display: block; }
     </div>
 
     <div class="aha-box" style="margin-top:20px; border-left-color:#7c3aed; background:#faf5ff; border-color:#c4b5fd;">
-      <strong style="color:#4c1d95;">Permutation problem solved!</strong>
       <p style="color:#4c1d95;">Unlike Step&nbsp;1, moving "dog" changes its position index m. The RoPE rotation shifts, the relative angular distance between "dog" and "bit" changes, and the attention score updates accordingly. The model now distinguishes "The <em>dog</em> bit the <em>man</em>" from "The <em>man</em> bit the <em>dog</em>."</p>
     </div>
   </div>

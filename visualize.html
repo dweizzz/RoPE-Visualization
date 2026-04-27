@@ -414,6 +414,75 @@ canvas { display: block; }
   height: 1px;
   background: #e2e8f0;
 }
+
+/* ── STEP 5 — WHY 2D BOX ── */
+.why-2d-box {
+  background: #f0f9ff; border: 1px solid #7dd3fc;
+  border-left: 4px solid #0284c7; border-radius: 8px;
+  padding: 14px 18px; margin: 20px 0 4px;
+}
+.why-2d-box strong { color: #0c4a6e; display: block; margin-bottom: 5px; font-size: 13px; }
+.why-2d-box p { color: #075985; font-size: 13px; line-height: 1.65; }
+
+/* ── STEP 5 — SANDBOX ── */
+.sandbox-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-top: 28px;
+}
+.sandbox-heading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+.sandbox-desc {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.sandbox-controls {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.sandbox-i-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.sandbox-i-btn {
+  padding: 7px 14px;
+  border: 2px solid #cbd5e1;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  transition: all 0.2s;
+  text-align: center;
+  line-height: 1.3;
+}
+.sandbox-i-btn:hover { border-color: #f59e0b; color: #92400e; background: #fffbeb; }
+.sandbox-i-btn.active { background: #f59e0b; border-color: #f59e0b; color: white; }
+
+/* ── STEP 5 — RESOLUTION SECTION ── */
+.resolution-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 20px; color: #7c3aed;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+}
+.resolution-divider::before,
+.resolution-divider::after {
+  content: ''; flex: 1; height: 1px; background: #e9d5ff;
+}
 </style>
 </head>
 <body>
@@ -702,11 +771,11 @@ canvas { display: block; }
       <p>Because only Q and K are rotated, the dot product Q·K<sup>T</sup> encodes the relative angle between positions — giving the model position aware attention scores. V is never rotated: it carries raw content, not position. This is why RoPE generalises to longer sequences than those seen during training.</p>
     </div>
 
-    <div class="pipe-section-divider">Now see the rotation math in action</div>
+    <div class="pipe-section-divider">The Inspector — Rotating Real Embeddings</div>
 
-    <!-- Token strip -->
+    <!-- ══ INSPECTOR SECTION ══ -->
     <div style="margin-top: 20px; margin-bottom: 6px;">
-      <div class="s5-embed-label" style="margin-bottom: 8px;">Select a token — its 8-dim embedding is split into 4 pairs and rotated by position:</div>
+      <div class="s5-embed-label" style="margin-bottom: 8px;">Select a token — its 8-dim embedding is split into 4 pairs and rotated by its actual position in the sentence:</div>
       <div class="token-strip" id="s5tokenStrip" style="margin-bottom: 0;"></div>
       <div style="margin-top: 10px; font-size: 13px; color: #64748b;">
         Encoding: <strong id="s5tokenWord" style="color: #0f172a;">"dog"</strong>
@@ -717,110 +786,156 @@ canvas { display: block; }
 
     <!-- Embedding vector row -->
     <div class="s5-embed-section">
-      <div class="s5-embed-label">Embedding vector (d = 8) — click a pair for the rotation equation below →</div>
+      <div class="s5-embed-label">Embedding vector (d = 8) — click a pair to highlight it in the table below →</div>
       <div class="s5-embed-row" id="s5embedRow"></div>
     </div>
 
     <!-- Before → After table -->
     <div style="margin-top: 16px; margin-bottom: 24px;">
-      <div class="s5-embed-label" style="margin-bottom: 10px;">All 4 pairs — before &amp; after RoPE at position m (highlighted row = selected pair)</div>
+      <div class="s5-embed-label" style="margin-bottom: 10px;">All 4 pairs — before &amp; after RoPE at this token's real position (highlighted row = selected pair)</div>
       <div style="overflow-x: auto;">
         <table id="s5baTable" style="border-collapse: collapse; font-size: 13px; width: 100%;"></table>
       </div>
     </div>
 
-    <!-- Equation + Cartesian plane -->
-    <div class="s5-main-layout">
+    <div class="why-2d-box">
+      <strong>Why split into 2D pairs?</strong>
+      <p>A large embedding (e.g. d&nbsp;=&nbsp;4096) is sliced into <em>d/2</em> consecutive pairs. 2D rotations are mathematically elegant and computationally cheap — a single 2&times;2 matrix multiply per pair. Each pair rotates at a <em>different frequency</em>: fast-rotating pairs (low i) track precise local word order, while slow-rotating pairs (high i) capture broad, global document structure. Together they give the model a multi-scale positional clock that spans both nearby and distant token relationships.</p>
+    </div>
 
-      <!-- Equation area -->
-      <div class="s5-equation-area">
-        <div class="s5-formula-chip">
-          &theta;&nbsp;=&nbsp;m&nbsp;&times;&nbsp;10000<sup style="font-size:10px;">&minus;2i/d</sup>
-          &nbsp;&nbsp;(i&nbsp;=&nbsp;<span class="chip-blue" id="s5iDisplay">0</span>,&nbsp;d&nbsp;=&nbsp;8)
-        </div>
+    <!-- ══ SANDBOX SECTION ══ -->
+    <div class="sandbox-section">
+      <div class="sandbox-heading">Sandbox Mode: The Multi-Scale Clock</div>
+      <div class="sandbox-desc">Let's leave the sentence behind and look at the pure math. We'll use a fixed abstract vector [0.8,&nbsp;0.6]. Change the Pair Index (i) and the Position (m) below. Notice how Pair&nbsp;0 (high frequency) spins wildly as m increases, while Pair&nbsp;3 (low frequency) barely ticks. This is how RoPE tracks both local and global distances!</div>
 
-        <div class="s5-eq-row">
-          <!-- 2×2 Rotation Matrix -->
-          <div class="s5-mat">
-            <div class="s5-mat-bl"></div>
-            <div class="s5-mat-inner">
-              <div class="s5-mat-row">
-                <span class="s5-mat-cell" id="s5m00">&nbsp;1.0000</span>
-                <span class="s5-mat-cell" id="s5m01">&nbsp;0.0000</span>
-              </div>
-              <div class="s5-mat-row">
-                <span class="s5-mat-cell" id="s5m10">&nbsp;0.0000</span>
-                <span class="s5-mat-cell" id="s5m11">&nbsp;1.0000</span>
-              </div>
-            </div>
-            <div class="s5-mat-br"></div>
-          </div>
-
-          <span class="s5-op">&times;</span>
-
-          <!-- Input column vector -->
-          <div class="s5-mat">
-            <div class="s5-mat-bl"></div>
-            <div class="s5-mat-inner">
-              <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v0">&nbsp;0.5000</span></div>
-              <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v1">-0.2000</span></div>
-            </div>
-            <div class="s5-mat-br"></div>
-          </div>
-
-          <span class="s5-op">=</span>
-
-          <!-- Output column vector (amber = links to canvas) -->
-          <div class="s5-mat">
-            <div class="s5-out-mat-bl"></div>
-            <div class="s5-mat-inner">
-              <div class="s5-mat-row"><span class="s5-out-cell" id="s5out0">&nbsp;0.5000</span></div>
-              <div class="s5-mat-row"><span class="s5-out-cell" id="s5out1">-0.2000</span></div>
-            </div>
-            <div class="s5-out-mat-br"></div>
+      <div class="sandbox-controls">
+        <div class="ctrl-group" style="margin-bottom:0; flex:1; min-width:200px;">
+          <span class="ctrl-lbl">Pair Index (i) — frequency selector:</span>
+          <div class="sandbox-i-btns" id="sandboxIBtns">
+            <button class="sandbox-i-btn active" data-i="0">Pair 0<br><span style="font-size:10px;font-weight:400;">fastest</span></button>
+            <button class="sandbox-i-btn" data-i="1">Pair 1</button>
+            <button class="sandbox-i-btn" data-i="2">Pair 2</button>
+            <button class="sandbox-i-btn" data-i="3">Pair 3<br><span style="font-size:10px;font-weight:400;">slowest</span></button>
           </div>
         </div>
-
-        <div class="s5-angle-chips">
-          <div class="s5-achip s5-achip-blue">&theta; = <span id="s5theta_rad">0.0000 rad</span></div>
-          <div class="s5-achip s5-achip-amber">= <span id="s5theta">0.00&deg;</span></div>
+        <div class="ctrl-group" style="margin-bottom:0; flex:1; min-width:200px;">
+          <label class="ctrl-lbl" for="sandboxMSlider">Theoretical Position (m): <strong id="sandboxMVal">0</strong></label>
+          <input type="range" id="sandboxMSlider" min="0" max="20" value="0" step="1">
         </div>
       </div>
 
-      <!-- Canvas + legend -->
-      <div class="s5-canvas-wrap">
-        <div class="s5-connect-label">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Output vector on 2D plane
+      <!-- Equation + Cartesian plane -->
+      <div class="s5-main-layout" style="margin-top:8px;">
+
+        <!-- Equation area -->
+        <div class="s5-equation-area">
+          <div class="s5-formula-chip">
+            &theta;&nbsp;=&nbsp;m&nbsp;&times;&nbsp;10000<sup style="font-size:10px;">&minus;2i/d</sup>
+            &nbsp;&nbsp;(i&nbsp;=&nbsp;<span class="chip-blue" id="s5iDisplay">0</span>,&nbsp;d&nbsp;=&nbsp;8)
+          </div>
+
+          <div class="s5-eq-row">
+            <!-- 2×2 Rotation Matrix -->
+            <div class="s5-mat">
+              <div class="s5-mat-bl"></div>
+              <div class="s5-mat-inner">
+                <div class="s5-mat-row">
+                  <span class="s5-mat-cell" id="s5m00">&nbsp;1.0000</span>
+                  <span class="s5-mat-cell" id="s5m01">&nbsp;0.0000</span>
+                </div>
+                <div class="s5-mat-row">
+                  <span class="s5-mat-cell" id="s5m10">&nbsp;0.0000</span>
+                  <span class="s5-mat-cell" id="s5m11">&nbsp;1.0000</span>
+                </div>
+              </div>
+              <div class="s5-mat-br"></div>
+            </div>
+
+            <span class="s5-op">&times;</span>
+
+            <!-- Input column vector (fixed [0.8, 0.6]) -->
+            <div class="s5-mat">
+              <div class="s5-mat-bl"></div>
+              <div class="s5-mat-inner">
+                <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v0">&nbsp;0.8000</span></div>
+                <div class="s5-mat-row"><span class="s5-vec-cell" id="s5v1">&nbsp;0.6000</span></div>
+              </div>
+              <div class="s5-mat-br"></div>
+            </div>
+
+            <span class="s5-op">=</span>
+
+            <!-- Output column vector -->
+            <div class="s5-mat">
+              <div class="s5-out-mat-bl"></div>
+              <div class="s5-mat-inner">
+                <div class="s5-mat-row"><span class="s5-out-cell" id="s5out0">&nbsp;0.8000</span></div>
+                <div class="s5-mat-row"><span class="s5-out-cell" id="s5out1">&nbsp;0.6000</span></div>
+              </div>
+              <div class="s5-out-mat-br"></div>
+            </div>
+          </div>
+
+          <div class="s5-angle-chips">
+            <div class="s5-achip s5-achip-blue">&theta; = <span id="s5theta_rad">0.0000 rad</span></div>
+            <div class="s5-achip s5-achip-amber">= <span id="s5theta">0.00&deg;</span></div>
+          </div>
         </div>
-        <canvas id="s5canvas" width="290" height="290"
-          style="border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);"></canvas>
-        <div class="s5-legend">
-          <div class="s5-legend-item">
-            <div class="s5-legend-dot" style="background:#94a3b8;"></div>Input (x, y)
+
+        <!-- Canvas + legend -->
+        <div class="s5-canvas-wrap">
+          <div class="s5-connect-label">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Output vector on 2D plane
           </div>
-          <div class="s5-legend-item">
-            <div class="s5-legend-dot" style="background:#f59e0b;"></div>Output (x&prime;, y&prime;)
-          </div>
-          <div class="s5-legend-item">
-            <div class="s5-legend-dot" style="background:#10b981;"></div>Rotation arc
+          <canvas id="s5canvas" width="290" height="290"
+            style="border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);"></canvas>
+          <div class="s5-legend">
+            <div class="s5-legend-item">
+              <div class="s5-legend-dot" style="background:#94a3b8;"></div>Input (x, y)
+            </div>
+            <div class="s5-legend-item">
+              <div class="s5-legend-dot" style="background:#f59e0b;"></div>Output (x&prime;, y&prime;)
+            </div>
+            <div class="s5-legend-item">
+              <div class="s5-legend-dot" style="background:#10b981;"></div>Rotation arc
+            </div>
           </div>
         </div>
+      </div><!-- /.s5-main-layout -->
+
+      <div class="aha-box" style="margin-top:16px;">
+        <p>Each pair uses a <em>different frequency</em>: Pair&nbsp;0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair&nbsp;3 (i=3) barely moves. This multi-scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
       </div>
+    </div><!-- /.sandbox-section -->
+
+    <div class="resolution-divider">The Resolution — RoPE Solves The Permutation Problem</div>
+
+    <div style="margin-bottom:14px;">
+      <div class="step-desc">Back in Step&nbsp;1, swapping <strong style="color:#1d4ed8;">dog</strong> and <strong style="color:#1d4ed8;">man</strong> never changed the attention score — 0.82, always. Now try it here. RoPE encodes position as a rotation, so moving "dog" shifts its angle and changes its relative distance to "bit". The score <em>will</em> change.</div>
     </div>
 
-    <!-- Position slider -->
-    <div class="ctrl-group" style="margin-top:24px;">
-      <label class="ctrl-lbl" for="s5slider">
-        Token Position (m): <strong id="s5mval">1</strong>
-      </label>
-      <input type="range" id="s5slider" min="0" max="20" value="1" step="1">
+    <div style="margin-top:16px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+      <span style="font-size:13px; font-weight:600; color:#475569;">Word order:</span>
+      <div class="word-row" id="wordRowFinal" style="margin-bottom:0;"></div>
     </div>
 
-    <div class="aha-box" style="margin-top:16px;">
-      <p>Each pair uses a <em>different frequency</em>: Pair 0 (i=0) rotates fastest, by <em>m</em> radians per step, while Pair 3 (i=3) barely moves. This multi scale encoding lets the model distinguish both nearby and distant token positions simultaneously.</p>
+    <div style="margin:10px 0 18px; font-size:13px; color:#64748b;">
+      bit ↔ dog attention score:
+      <span class="score-badge" id="scoreBadgeFinal">0.70</span>
+      <span id="scoreNoteFinal" style="margin-left:8px; font-size:12px; color:#7c3aed; font-weight:600;"></span>
+    </div>
+
+    <div class="matrix-wrap">
+      <div class="matrix-title">RoPE-Aware QK<sup>T</sup> Attention Score Matrix &nbsp;—&nbsp; <span style="color:#f59e0b;">★ = "bit" ↔ "dog" score</span></div>
+      <table class="attn-table" id="attnTableFinal"></table>
+    </div>
+
+    <div class="aha-box" style="margin-top:20px; border-left-color:#7c3aed; background:#faf5ff; border-color:#c4b5fd;">
+      <strong style="color:#4c1d95;">Permutation problem solved!</strong>
+      <p style="color:#4c1d95;">Unlike Step&nbsp;1, moving "dog" changes its position index m. The RoPE rotation shifts, the relative angular distance between "dog" and "bit" changes, and the attention score updates accordingly. The model now distinguishes "The <em>dog</em> bit the <em>man</em>" from "The <em>man</em> bit the <em>dog</em>."</p>
     </div>
   </div>
   <div class="nav-buttons">
@@ -1393,12 +1508,17 @@ function initStep5() {
     [ 0.6,  0.3,  0.2, -0.7,  0.1,  0.5, -0.8,  0.4],
   ];
   const D = 8;
-  let selectedPair = 0;
+
+  // ── Inspector state ──
   let selectedToken = 1;
-  let EMBED = [...S5_EMBEDS[selectedToken]];
+  let selectedPair = 0;
 
-  document.getElementById('s5slider').value = selectedToken;
+  // ── Sandbox state ──
+  let sandbox_m = 0;
+  let sandbox_i = 0;
+  const SANDBOX_VEC = [0.8, 0.6];
 
+  // ── Inspector: Token strip ──
   const strip = document.getElementById('s5tokenStrip');
   const tokEls = [];
   S5_WORDS.forEach((word, pos) => {
@@ -1407,18 +1527,21 @@ function initStep5() {
     tok.innerHTML = '<span class="ti">' + pos + '</span>' + word;
     tok.addEventListener('click', () => {
       selectedToken = pos;
-      EMBED = [...S5_EMBEDS[pos]];
-      document.getElementById('s5slider').value = pos;
       document.getElementById('s5tokenWord').textContent = '"' + word + '"';
+      document.getElementById('s5tokenPos').textContent = 'm = ' + pos;
       tokEls.forEach((t, i) => { t.className = 'tok' + (i === pos ? ' qa' : ''); });
       rebuildEmbedRow();
-      update5();
+      updateInspector();
     });
     strip.appendChild(tok);
     tokEls.push(tok);
   });
 
+  document.getElementById('s5tokenWord').textContent = '"' + S5_WORDS[selectedToken] + '"';
+  document.getElementById('s5tokenPos').textContent = 'm = ' + selectedToken;
+
   function rebuildEmbedRow() {
+    const EMBED = S5_EMBEDS[selectedToken];
     const embedRow = document.getElementById('s5embedRow');
     embedRow.innerHTML = '';
     for (let p = 0; p < 4; p++) {
@@ -1442,29 +1565,29 @@ function initStep5() {
       pairDiv.appendChild(cr);
       pairDiv.addEventListener('click', () => {
         selectedPair = p;
-        document.querySelectorAll('.s5-pair').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('#s5embedRow .s5-pair').forEach(el => el.classList.remove('selected'));
         pairDiv.classList.add('selected');
-        update5();
+        updateInspector();
       });
       embedRow.appendChild(pairDiv);
     }
   }
 
-  rebuildEmbedRow();
-
-  function updateBATable(m) {
+  function updateInspector() {
+    const m = selectedToken;
+    const EMBED = S5_EMBEDS[selectedToken];
     const tbl = document.getElementById('s5baTable');
     tbl.innerHTML = '';
     const thead = tbl.createTHead();
     const hr = thead.insertRow();
     [
-      { txt: 'Pair (i)',            bg: '#f8fafc', col: '#475569' },
-      { txt: 'Dims',               bg: '#f8fafc', col: '#475569' },
-      { txt: 'x (before)',         bg: '#eff6ff', col: '#1e40af' },
-      { txt: 'y (before)',         bg: '#eff6ff', col: '#1e40af' },
-      { txt: 'θ at position m',     bg: '#f8fafc', col: '#475569' },
-      { txt: "x′ (after)",         bg: '#fffbeb', col: '#92400e' },
-      { txt: "y′ (after)",         bg: '#fffbeb', col: '#92400e' },
+      { txt: 'Pair (i)',         bg: '#f8fafc', col: '#475569' },
+      { txt: 'Dims',             bg: '#f8fafc', col: '#475569' },
+      { txt: 'x (before)',       bg: '#eff6ff', col: '#1e40af' },
+      { txt: 'y (before)',       bg: '#eff6ff', col: '#1e40af' },
+      { txt: 'θ at position m',  bg: '#f8fafc', col: '#475569' },
+      { txt: "x′ (after)",       bg: '#fffbeb', col: '#92400e' },
+      { txt: "y′ (after)",       bg: '#fffbeb', col: '#92400e' },
     ].forEach(h => {
       const th = document.createElement('th');
       th.textContent = h.txt;
@@ -1502,6 +1625,7 @@ function initStep5() {
     }
   }
 
+  // ── Sandbox: Canvas ──
   const canvas = document.getElementById('s5canvas');
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
@@ -1519,16 +1643,16 @@ function initStep5() {
     ctx.fillStyle = color; ctx.fill();
   }
 
-  function update5() {
-    const m = parseInt(document.getElementById('s5slider').value);
-    document.getElementById('s5mval').textContent = m;
-    document.getElementById('s5tokenPos').textContent = 'm = ' + m;
-    const i = selectedPair;
+  function updateSandbox() {
+    const m = sandbox_m;
+    const i = sandbox_i;
+    const [x, y] = SANDBOX_VEC;
+
+    document.getElementById('sandboxMVal').textContent = m;
     document.getElementById('s5iDisplay').textContent = i;
 
     const theta = m * Math.pow(10000, -2 * i / D);
     const cosT = Math.cos(theta), sinT = Math.sin(theta);
-    const x = EMBED[i * 2], y = EMBED[i * 2 + 1];
     const xOut = x * cosT - y * sinT;
     const yOut = x * sinT + y * cosT;
 
@@ -1543,8 +1667,6 @@ function initStep5() {
     document.getElementById('s5out1').textContent = fmt(yOut);
     document.getElementById('s5theta_rad').textContent = theta.toFixed(4) + ' rad';
     document.getElementById('s5theta').textContent = (theta * 180 / Math.PI).toFixed(2) + '°';
-
-    updateBATable(m);
 
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = '#fafbfc';
@@ -1614,8 +1736,121 @@ function initStep5() {
     ctx.textAlign = 'left';
   }
 
-  document.getElementById('s5slider').addEventListener('input', update5);
-  update5();
+  // ── Sandbox controls ──
+  document.getElementById('sandboxMSlider').addEventListener('input', function() {
+    sandbox_m = parseInt(this.value);
+    updateSandbox();
+  });
+
+  document.querySelectorAll('.sandbox-i-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      sandbox_i = parseInt(this.dataset.i);
+      document.querySelectorAll('.sandbox-i-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      updateSandbox();
+    });
+  });
+
+  // ── Final Resolution Section ──
+  let wordOrderFinal = ['The','dog','bit','the','man'];
+  let dragSrcFinal = null;
+
+  function getRoPEScore(wordA, posA, wordB, posB) {
+    const baseScore = getScore(wordA, wordB);
+    const distance = Math.abs(posA - posB);
+    return baseScore * Math.max(0.2, 1 - distance * 0.15);
+  }
+
+  function buildWordRowFinal() {
+    const row = document.getElementById('wordRowFinal');
+    row.innerHTML = '';
+    wordOrderFinal.forEach((word, i) => {
+      const chip = document.createElement('div');
+      const isDraggable = word === 'dog' || word === 'man';
+      chip.className = 'word-chip' + (isDraggable ? ' draggable' : '');
+      chip.innerHTML = '<span class="idx">' + i + '</span>' + word;
+      chip.dataset.i = i;
+      if (isDraggable) {
+        chip.draggable = true;
+        chip.addEventListener('dragstart', e => {
+          dragSrcFinal = i;
+          chip.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+      }
+      chip.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (isDraggable) chip.classList.add('drag-over');
+      });
+      chip.addEventListener('dragleave', () => chip.classList.remove('drag-over'));
+      chip.addEventListener('drop', e => {
+        e.preventDefault();
+        chip.classList.remove('drag-over');
+        if (dragSrcFinal !== null && dragSrcFinal !== i && isDraggable) {
+          [wordOrderFinal[dragSrcFinal], wordOrderFinal[i]] = [wordOrderFinal[i], wordOrderFinal[dragSrcFinal]];
+          buildWordRowFinal();
+          buildMatrixFinal();
+          updateScoreBadgeFinal();
+        }
+        dragSrcFinal = null;
+      });
+      row.appendChild(chip);
+    });
+  }
+
+  function updateScoreBadgeFinal() {
+    const dogPos = wordOrderFinal.indexOf('dog');
+    const bitPos = wordOrderFinal.indexOf('bit');
+    const score = getRoPEScore('dog', dogPos, 'bit', bitPos);
+    document.getElementById('scoreBadgeFinal').textContent = score.toFixed(2);
+    const distance = Math.abs(dogPos - bitPos);
+    const isInitial = dogPos === 1 && bitPos === 2;
+    document.getElementById('scoreNoteFinal').textContent =
+      isInitial ? '(drag tokens to see it change!)' : '(distance=' + distance + ' → score shifted!)';
+  }
+
+  function buildMatrixFinal() {
+    const tbl = document.getElementById('attnTableFinal');
+    tbl.innerHTML = '';
+    const thead = tbl.createTHead();
+    const hr = thead.insertRow();
+    const corner = document.createElement('th');
+    corner.textContent = 'Q \\ K';
+    hr.appendChild(corner);
+    wordOrderFinal.forEach(w => {
+      const th = document.createElement('th');
+      th.textContent = w;
+      hr.appendChild(th);
+    });
+    const tbody = tbl.createTBody();
+    wordOrderFinal.forEach((rw, ri) => {
+      const tr = tbody.insertRow();
+      const rh = tr.insertCell();
+      rh.className = 'row-hdr';
+      rh.textContent = rw;
+      wordOrderFinal.forEach((cw, ci) => {
+        const td = tr.insertCell();
+        const s = getRoPEScore(rw, ri, cw, ci);
+        td.style.background = heatColor(s);
+        const isBitDog = (rw === 'bit' && cw === 'dog') || (rw === 'dog' && cw === 'bit');
+        if (isBitDog) {
+          td.className = 'hl';
+          td.textContent = s.toFixed(2) + ' ★';
+        } else {
+          td.textContent = s.toFixed(2);
+        }
+      });
+    });
+  }
+
+  buildWordRowFinal();
+  buildMatrixFinal();
+  updateScoreBadgeFinal();
+
+  rebuildEmbedRow();
+  updateInspector();
+  updateSandbox();
 }
 </script>
 </body>
